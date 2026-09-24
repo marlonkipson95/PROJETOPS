@@ -11,8 +11,32 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
+
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #pix-print-area, #pix-print-area * {
+                visibility: visible !important;
+            }
+            #pix-print-area {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 24px !important;
+                background: white !important;
+                box-shadow: none !important;
+                border: none !important;
+                z-index: 99999 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
@@ -20,8 +44,14 @@
     <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <span class="text-xl font-bold text-blue-600 tracking-tight">ServiçosApp</span>
+                <div class="flex-shrink-0 flex items-center space-x-3">
+                    <span id="logo-app" class="text-xl font-bold text-blue-600 tracking-tight cursor-pointer">ServiçosApp</span>
+                    <button id="btn-nav-area-testes" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 transition-colors shadow-xs cursor-pointer">
+                        <i class="fas fa-flask text-amber-600 mr-1.5"></i>
+                        <span class="hidden sm:inline">Área de Testes</span>
+                        <span class="sm:hidden">Testes</span>
+                        <span class="ml-1.5 px-1.5 py-0.2 bg-amber-200 text-amber-900 rounded-full text-[10px] font-bold">Demo</span>
+                    </button>
                 </div>
                 <div id="auth-container" class="flex items-center">
                     <!-- Dynamic auth content injected here -->
@@ -308,38 +338,240 @@
         </div>
     </div>
 
-    <!-- Pix Modal -->
-    <div id="pix-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Modal: Editar Dados Cadastrais / Perfil -->
+    <div id="modal-editar-perfil" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-100">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 text-center">
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                        <i class="fas fa-qrcode text-green-600 text-xl"></i>
-                    </div>
-                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-2">Cobrança via Pix</h3>
-                    <p class="text-sm text-gray-500 mb-4" id="pix-modal-titulo">Serviço</p>
-                    
-                    <div class="text-3xl font-bold text-gray-900 mb-6" id="pix-modal-valor">R$ 0,00</div>
-                    
-                    <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
-                        <p class="text-xs text-gray-500 mb-1 uppercase font-bold">Sua Chave Pix</p>
-                        <p class="text-md font-mono text-gray-800 break-all" id="pix-modal-chave"></p>
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-xs" id="backdrop-editar-perfil"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-100">
+                <form id="form-editar-perfil">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900">Meus Dados Cadastrais</h3>
+                        </div>
+                        <button type="button" id="btn-fechar-editar-perfil" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
                     </div>
 
-                    <div class="mx-auto w-48 h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4">
-                        <span class="text-gray-400 text-xs">QR Code Simulado</span>
+                    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Nome Completo / Razão Social *</label>
+                                <input type="text" id="perfil-nome" required class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Tipo de Pessoa *</label>
+                                <select id="perfil-tipo-pessoa" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="Física">Pessoa Física (PF)</option>
+                                    <option value="Jurídica">Pessoa Jurídica (PJ / Empresa)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">CPF ou CNPJ *</label>
+                                <input type="text" id="perfil-documento" placeholder="000.000.000-00" required class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">WhatsApp / Telefone *</label>
+                                <input type="text" id="perfil-telefone" placeholder="(00) 00000-0000" required class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Cidade *</label>
+                                <input type="text" id="perfil-cidade" placeholder="Ex: São Paulo" required class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Estado (UF) *</label>
+                                <input type="text" id="perfil-estado" placeholder="SP" maxlength="2" required class="w-full text-sm uppercase border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Tipo de Atuação na Plataforma *</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition-colors flex flex-col items-center">
+                                    <input type="radio" name="editar-perfil-tipo" value="solicitante" class="h-4 w-4 text-blue-600 mb-1">
+                                    <span class="text-xs font-bold text-gray-800">Contratante</span>
+                                    <span class="text-[10px] text-gray-400">Solicitar</span>
+                                </label>
+                                <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition-colors flex flex-col items-center">
+                                    <input type="radio" name="editar-perfil-tipo" value="prestador" class="h-4 w-4 text-blue-600 mb-1">
+                                    <span class="text-xs font-bold text-gray-800">Prestador</span>
+                                    <span class="text-[10px] text-gray-400">Oferecer</span>
+                                </label>
+                                <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition-colors flex flex-col items-center">
+                                    <input type="radio" name="editar-perfil-tipo" value="ambos" class="h-4 w-4 text-blue-600 mb-1">
+                                    <span class="text-xs font-bold text-gray-800">Ambos</span>
+                                    <span class="text-[10px] text-gray-400">Os dois</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Seção Prestador -->
+                        <div id="secao-dados-prestador" class="space-y-4 pt-2 border-t border-gray-100">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Biografia / Apresentação Profissional</label>
+                                <textarea id="perfil-bio" rows="3" placeholder="Descreva sua experiência profissional, diferenciais e modo de atuação..." class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Chave Pix para Recebimento</label>
+                                <input type="text" id="perfil-chave-pix" placeholder="E-mail, CPF, Celular ou Chave Aleatória" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
                     </div>
-                    
-                    <p class="text-xs text-gray-400">
-                        Nesta versão, a transação não é automática. O cliente deverá realizar a transferência para a chave acima.
+
+                    <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                        <button type="button" id="btn-cancelar-editar-perfil" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="btn-salvar-dados-perfil" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-sm transition-colors">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detalhes do Serviço no Catálogo com Contratação -->
+    <div id="modal-detalhes-catalogo" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-xs" id="backdrop-detalhes-catalogo"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-100">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800" id="detalhes-servico-categoria">Categoria</span>
+                    <button type="button" id="btn-fechar-detalhes-catalogo" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                    <div>
+                        <div class="flex justify-between items-start gap-3">
+                            <h3 class="text-xl font-bold text-gray-900" id="detalhes-servico-titulo">Título do Serviço</h3>
+                            <span class="text-2xl font-black text-emerald-700 shrink-0" id="detalhes-servico-preco">R$ 0,00</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2 whitespace-pre-line" id="detalhes-servico-descricao"></p>
+                    </div>
+
+                    <!-- Prestador Box -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <img id="detalhes-prestador-foto" src="" class="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-2xs">
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-sm" id="detalhes-prestador-nome">Nome do Prestador</h4>
+                                <div class="flex items-center gap-2 text-xs text-gray-500">
+                                    <span id="detalhes-prestador-cidade">Cidade</span>
+                                    <span>&bull;</span>
+                                    <span class="text-amber-500 font-bold" id="detalhes-prestador-avaliacao">
+                                        <i class="fas fa-star text-xs"></i> 5.0
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 italic bg-white p-3 rounded-lg border border-gray-100" id="detalhes-prestador-bio">
+                            Biografia do profissional...
+                        </p>
+                        <div class="mt-3 flex gap-2">
+                            <a id="btn-whatsapp-prestador" target="_blank" class="flex-1 inline-flex justify-center items-center px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg text-xs font-semibold transition-colors">
+                                <i class="fab fa-whatsapp mr-1.5 text-sm"></i> Conversar no WhatsApp
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Avaliações do Prestador -->
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-sm mb-2">Avaliações deste Profissional</h4>
+                        <div id="detalhes-avaliacoes-lista" class="space-y-2 max-h-48 overflow-y-auto">
+                            <!-- Injetado dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <p class="text-xs text-gray-500">Ao contratar, um pedido é aberto diretamente com o prestador.</p>
+                    <button type="button" id="btn-contratar-servico-direto" class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-lg shadow-sm transition-colors whitespace-nowrap">
+                        <i class="fas fa-check-circle mr-1.5"></i> Contratar Serviço
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pix Modal / Demonstrativo de Pagamento e PDF -->
+    <div id="pix-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-xs no-print" id="backdrop-pix"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+                <!-- Área Imprimível em PDF -->
+                <div id="pix-print-area" class="bg-white p-6 sm:p-8 text-center">
+                    <div class="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
+                        <div class="text-left">
+                            <span class="text-lg font-black text-blue-600">ServiçosApp</span>
+                            <span class="block text-[10px] text-gray-400 uppercase tracking-widest">Demonstrativo de Orçamento & Pix</span>
+                        </div>
+                        <div class="text-right text-xs text-gray-500">
+                            <span class="block font-semibold" id="pix-modal-data">Data de Emissão</span>
+                            <span class="text-[10px] text-emerald-600 font-bold uppercase">Proposta Aprovada</span>
+                        </div>
+                    </div>
+
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 mb-3 no-print">
+                        <i class="fas fa-qrcode text-emerald-600 text-xl"></i>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-gray-900 mb-1" id="pix-modal-titulo">Serviço</h3>
+                    <p class="text-xs text-gray-500 mb-4" id="pix-modal-subtitulo">Prestador &bull; Cliente</p>
+
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
+                        <span class="text-[10px] text-emerald-800 uppercase font-extrabold tracking-wider block mb-0.5">Valor Total a Pagar</span>
+                        <div class="text-3xl font-black text-emerald-900" id="pix-modal-valor">R$ 0,00</div>
+                    </div>
+
+                    <!-- QR Code Real -->
+                    <div class="mx-auto w-48 h-48 bg-white border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center p-2 mb-4 shadow-2xs">
+                        <img id="pix-qrcode-img" src="" alt="QR Code Pix" class="w-full h-full object-contain">
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200 text-left">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] text-gray-500 uppercase font-bold">Chave Pix do Prestador</span>
+                            <button type="button" id="btn-copiar-chave-pix" class="text-xs text-blue-600 hover:text-blue-800 font-semibold no-print">
+                                <i class="far fa-copy mr-1"></i> Copiar
+                            </button>
+                        </div>
+                        <p class="text-xs font-mono text-gray-800 break-all select-all font-semibold" id="pix-modal-chave"></p>
+                    </div>
+
+                    <p class="text-[11px] text-gray-400">
+                        Pague com segurança através do aplicativo do seu banco lendo o QR Code ou colando a chave Pix.
                     </p>
                 </div>
-                <div class="bg-gray-50 px-4 py-4 sm:px-6 flex justify-center border-t border-gray-100">
-                    <button type="button" id="btn-fechar-pix" class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        Fechar
+
+                <!-- Rodapé de Ações (WhatsApp, PDF, Fechar) -->
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3 no-print">
+                    <button type="button" id="btn-whatsapp-pix" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors shadow-xs">
+                        <i class="fab fa-whatsapp mr-1.5 text-sm"></i> Enviar por WhatsApp
                     </button>
+                    <div class="flex gap-2 w-full sm:w-auto justify-end">
+                        <button type="button" id="btn-pdf-pix" class="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-lg transition-colors shadow-xs">
+                            <i class="fas fa-file-pdf mr-1.5 text-red-400"></i> Baixar / Imprimir PDF
+                        </button>
+                        <button type="button" id="btn-fechar-pix" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+                            Fechar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

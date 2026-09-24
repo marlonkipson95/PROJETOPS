@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, addDoc, query, where, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { inicializarAreaTestes } from "./area-testes.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAz_-CckCU3jg4LgGmU7R2N36eOOmvC9NY",
@@ -23,14 +24,16 @@ const mainContent = document.getElementById('main-content');
 const onboardingModal = document.getElementById('onboarding-modal');
 let btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
 
-// Taxonomia Base
+// Taxonomia Base Expandida (PROJETO.md e Fase 2)
 const TAXONOMIA = {
+    "Casa e Jardim": ["Jardinagem", "Piscinas", "Limpeza", "Elétrica residencial", "Hidráulica", "Manutenção", "Outros"],
+    "Obras e Reforma": ["Pedreiro", "Pintura", "Reforma", "Instalação", "Acabamento", "Gesseiro", "Outros"],
+    "Automotivo": ["Mecânica", "Elétrica automotiva", "Revisão", "Freios", "Motor", "Funilaria", "Outros"],
+    "TI e Redes": ["Suporte técnico", "Redes", "Infraestrutura", "Desenvolvimento", "Manutenção de computadores", "Outros"],
+    "Freelancers / Acadêmico": ["Design", "Redação", "Revisão", "Formatação", "Tradução", "Serviços acadêmicos", "Outros"],
     "ELETRICIDADE": ["Instalação elétrica", "Manutenção elétrica", "Instalação de chuveiro", "Tomadas", "Iluminação", "Outros"],
     "CONSTRUÇÃO E REFORMA": ["Pedreiro", "Pintor", "Encanador", "Gesseiro", "Azulejista", "Outros"],
-    "AUTOMOTIVO": ["Mecânica", "Elétrica automotiva", "Funilaria", "Manutenção", "Outros"],
-    "CASA E JARDIM": ["Jardinagem", "Limpeza de piscina", "Limpeza residencial", "Manutenção", "Outros"],
-    "TECNOLOGIA": ["Computadores", "Redes", "Suporte técnico", "Desenvolvimento", "Infraestrutura", "Outros"],
-    "OUTROS": ["Serviços Gerais", "Consultoria", "Outros"]
+    "TECNOLOGIA": ["Computadores", "Redes", "Suporte técnico", "Desenvolvimento", "Infraestrutura", "Outros"]
 };
 
 // Handle Authentication State Changes
@@ -74,7 +77,7 @@ function renderAuthenticatedNav(user) {
 function renderWelcomeScreen() {
     mainContent.innerHTML = `
         <div class="flex flex-col justify-center items-center h-full min-h-[60vh] text-center px-4">
-            <div class="bg-blue-50 text-blue-600 p-4 rounded-full mb-6">
+            <div class="bg-blue-50 text-blue-600 p-4 rounded-full mb-6 shadow-xs">
                 <i class="fas fa-tools text-4xl"></i>
             </div>
             <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
@@ -83,12 +86,18 @@ function renderWelcomeScreen() {
             <p class="max-w-2xl text-lg sm:text-xl text-gray-500 mb-8">
                 A plataforma ideal para encontrar profissionais qualificados ou oferecer seus serviços para milhares de clientes.
             </p>
-            <button id="btn-hero-login" class="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <i class="fab fa-google mr-2"></i> Começar Agora
-            </button>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button id="btn-hero-login" class="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
+                    <i class="fab fa-google mr-2"></i> Começar Agora
+                </button>
+                <button id="btn-hero-demo" class="inline-flex items-center justify-center px-6 py-3.5 border border-amber-300 text-base font-semibold rounded-lg text-amber-900 bg-amber-50 hover:bg-amber-100 shadow-xs transition-all cursor-pointer">
+                    <i class="fas fa-flask mr-2 text-amber-600"></i> Área de Testes (Demo)
+                </button>
+            </div>
         </div>
     `;
     document.getElementById('btn-hero-login').addEventListener('click', login);
+    document.getElementById('btn-hero-demo').addEventListener('click', () => abrirAreaTestes(null));
 }
 
 function renderDashboard(userData) {
@@ -114,6 +123,9 @@ function renderDashboard(userData) {
                     <button class="tab-button border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-dashboard">
                         <i class="fas fa-home mr-2"></i>Dashboard
                     </button>
+                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-catalogo">
+                        <i class="fas fa-store mr-2"></i>Catálogo de Serviços
+                    </button>
                     ${(userData.tipo === 'solicitante' || userData.tipo === 'ambos') ? `
                     <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-solicitante">
                         <i class="fas fa-clipboard-list mr-2"></i>Minhas Solicitações
@@ -127,6 +139,9 @@ function renderDashboard(userData) {
                     <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-usuarios">
                         <i class="fas fa-users mr-2"></i>Explorar Usuários
                     </button>
+                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-area-testes">
+                        <i class="fas fa-flask text-amber-600 mr-2"></i>Área de Testes <span class="ml-1 px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">Demo</span>
+                    </button>
                 </nav>
             </div>
 
@@ -138,7 +153,33 @@ function renderDashboard(userData) {
                         <p class="text-blue-100 text-lg">Bem-vindo(a) ao seu painel de controle.</p>
                     </div>
                     <div class="px-6 py-8 sm:p-10">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Seu Perfil Atual</h3>
+                        ${(!userData.telefone || !userData.documento || !userData.cidade) ? `
+                        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-amber-900 text-xs sm:text-sm">Complete seus Dados Cadastrais</h4>
+                                    <p class="text-[11px] sm:text-xs text-amber-700">Preencha seu WhatsApp, CPF/CNPJ e localização para usar todas as funções da plataforma.</p>
+                                </div>
+                            </div>
+                            <button id="btn-alerta-editar-perfil" class="shrink-0 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs">
+                                Preencher Agora
+                            </button>
+                        </div>
+                        ` : ''}
+
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Seu Perfil Atual</h3>
+                                <p class="text-xs text-gray-500">Dados do titular e status da conta</p>
+                            </div>
+                            <button id="btn-abrir-editar-perfil" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg border border-blue-200 transition-colors shadow-2xs cursor-pointer">
+                                <i class="fas fa-user-edit"></i> Editar Perfil / Dados Cadastrais
+                            </button>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
                                 <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
@@ -163,6 +204,32 @@ function renderDashboard(userData) {
                             </div>
                         </div>
 
+                        <!-- Detalhes de Cadastro -->
+                        <div class="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-gray-600">
+                            <div>
+                                <span class="font-semibold text-gray-500 block text-[10px] uppercase">Documento</span>
+                                <span class="font-medium text-gray-800">${userData.documento || '<span class="text-amber-500 font-normal">Não informado</span>'}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-gray-500 block text-[10px] uppercase">WhatsApp</span>
+                                <span class="font-medium text-gray-800">${userData.telefone || '<span class="text-amber-500 font-normal">Não informado</span>'}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-gray-500 block text-[10px] uppercase">Cidade / UF</span>
+                                <span class="font-medium text-gray-800">${userData.cidade ? `${userData.cidade} - ${userData.estado || ''}` : '<span class="text-amber-500 font-normal">Não informado</span>'}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-gray-500 block text-[10px] uppercase">Tipo de Pessoa</span>
+                                <span class="font-medium text-gray-800">${userData.tipoPessoa || 'Pessoa Física (PF)'}</span>
+                            </div>
+                        </div>
+                        ${userData.bio ? `
+                        <div class="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 text-xs text-gray-600">
+                            <span class="font-bold text-gray-700 block mb-1">Apresentação / Bio:</span>
+                            <p class="italic">${userData.bio}</p>
+                        </div>
+                        ` : ''}
+
                         ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
                         <div class="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
                             <h3 class="text-lg font-semibold text-blue-900 mb-2">Sua Chave Pix (Opcional)</h3>
@@ -175,6 +242,30 @@ function renderDashboard(userData) {
                             </div>
                         </div>
                         ` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Catálogo de Serviços -->
+            <div class="tab-content hidden" id="tab-catalogo">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-100 pb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Catálogo de Serviços Profissionais</h3>
+                            <p class="text-sm text-gray-500">Explore serviços cadastrados, filtre por categoria e contrate diretamente com o profissional.</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                            <div class="relative flex-grow sm:w-64">
+                                <input type="text" id="catalogo-search" placeholder="Buscar por serviço ou descrição..." class="w-full text-xs pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <i class="fas fa-search absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
+                            </div>
+                            <select id="catalogo-categoria-filtro" class="text-xs border border-gray-300 rounded-lg py-2 px-3 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="">Todas as Categorias</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="catalogo-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="col-span-full text-center py-8 text-gray-500 text-sm">Carregando catálogo...</div>
                     </div>
                 </div>
             </div>
@@ -203,6 +294,32 @@ function renderDashboard(userData) {
             ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
             <div class="tab-content hidden" id="tab-prestador">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10 mb-6">
+                    <!-- Dashboard de Desempenho do Prestador -->
+                    <div class="mb-8 bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Painel de Desempenho & Aproveitamento</h3>
+                            <p class="text-sm text-gray-500">Métricas de conversão de propostas e valores médios de orçamentos.</p>
+                        </div>
+                        <div id="prestador-metricas-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+                                <span class="text-xs text-gray-500 block mb-1 font-medium">Total de Propostas</span>
+                                <span class="text-2xl font-black text-gray-900" id="metrica-total-orcamentos">0</span>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+                                <span class="text-xs text-emerald-700 block mb-1 font-medium">Taxa de Aprovação</span>
+                                <span class="text-2xl font-black text-emerald-600" id="metrica-taxa-aprovacao">0%</span>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+                                <span class="text-xs text-blue-700 block mb-1 font-medium">Ticket Médio</span>
+                                <span class="text-2xl font-black text-blue-600" id="metrica-ticket-medio">R$ 0,00</span>
+                            </div>
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+                                <span class="text-xs text-purple-700 block mb-1 font-medium">Total Fechado</span>
+                                <span class="text-2xl font-black text-purple-600" id="metrica-total-fechado">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <div>
                             <h3 class="text-xl font-bold text-gray-900">Mural de Solicitações</h3>
@@ -217,9 +334,17 @@ function renderDashboard(userData) {
                     </div>
 
                     <div class="border-t border-gray-100 pt-8 mb-10">
-                        <div class="mb-6">
-                            <h3 class="text-xl font-bold text-gray-900">Meus Orçamentos Enviados</h3>
-                            <p class="text-sm text-gray-500">Acompanhe o status das suas propostas.</p>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">Meus Orçamentos Enviados</h3>
+                                <p class="text-sm text-gray-500">Histórico de propostas separadas por status.</p>
+                            </div>
+                            <div class="flex gap-1.5 bg-gray-100 p-1 rounded-xl" id="filtro-orcamentos-container">
+                                <button class="btn-filtro-orcamento px-3 py-1 text-xs font-semibold rounded-lg bg-white shadow-2xs text-gray-800" data-status="TODOS">Todos</button>
+                                <button class="btn-filtro-orcamento px-3 py-1 text-xs font-semibold rounded-lg text-gray-600 hover:text-gray-900" data-status="APROVADO">Aprovados</button>
+                                <button class="btn-filtro-orcamento px-3 py-1 text-xs font-semibold rounded-lg text-gray-600 hover:text-gray-900" data-status="AGUARDANDO">Aguardando</button>
+                                <button class="btn-filtro-orcamento px-3 py-1 text-xs font-semibold rounded-lg text-gray-600 hover:text-gray-900" data-status="REPROVADO">Reprovados</button>
+                            </div>
                         </div>
                         <div id="meus-orcamentos-list" class="space-y-4">
                             <div class="text-center py-8 text-gray-500 text-sm">Carregando orçamentos...</div>
@@ -261,6 +386,14 @@ function renderDashboard(userData) {
                     </div>
                 </div>
             </div>
+
+            <!-- Tab: Área de Testes -->
+            <div class="tab-content hidden" id="tab-area-testes">
+                <div class="text-center py-12 text-gray-500 text-sm">
+                    <i class="fas fa-spinner fa-spin text-amber-600 text-xl mb-2"></i>
+                    <p>Carregando Área de Testes e Demonstração...</p>
+                </div>
+            </div>
         </div>
     `;
 
@@ -283,8 +416,18 @@ function renderDashboard(userData) {
             button.classList.add('border-blue-500', 'text-blue-600');
             
             const target = button.getAttribute('data-target');
-            document.getElementById(target).classList.remove('hidden');
-            document.getElementById(target).classList.add('block');
+            const targetEl = document.getElementById(target);
+            if (targetEl) {
+                targetEl.classList.remove('hidden');
+                targetEl.classList.add('block');
+            }
+
+            if (target === 'tab-area-testes') {
+                inicializarAreaTestes(db, targetEl, () => {
+                    const btnDash = document.querySelector('.tab-button[data-target="tab-dashboard"]');
+                    if (btnDash) btnDash.click();
+                });
+            }
         });
     });
 
@@ -323,9 +466,362 @@ function renderDashboard(userData) {
         carregarServicosAvulsos(userData.uid);
     }
 
+    // Configura o modal de edição de perfil
+    configurarModalEditarPerfil(userData);
+
+    // Carrega o catálogo de serviços
+    carregarCatalogo(userData);
+
     // Load Users automatically
     carregarUsuariosLista();
     document.getElementById('btn-atualizar-usuarios').addEventListener('click', carregarUsuariosLista);
+}
+
+// ==========================================
+// Modal: Edição de Dados Cadastrais / Perfil
+// ==========================================
+function configurarModalEditarPerfil(userData) {
+    const modal = document.getElementById('modal-editar-perfil');
+    if (!modal) return;
+
+    const abrirModal = () => {
+        document.getElementById('perfil-nome').value = userData.nome || '';
+        document.getElementById('perfil-tipo-pessoa').value = userData.tipoPessoa || 'Física';
+        document.getElementById('perfil-documento').value = userData.documento || '';
+        document.getElementById('perfil-telefone').value = userData.telefone || '';
+        document.getElementById('perfil-cidade').value = userData.cidade || '';
+        document.getElementById('perfil-estado').value = userData.estado || '';
+        document.getElementById('perfil-bio').value = userData.bio || '';
+        document.getElementById('perfil-chave-pix').value = userData.chavePix || '';
+
+        const tipoAtual = userData.tipo || 'solicitante';
+        const radio = modal.querySelector(`input[name="editar-perfil-tipo"][value="${tipoAtual}"]`);
+        if (radio) radio.checked = true;
+
+        modal.classList.remove('hidden');
+    };
+
+    const fecharModal = () => {
+        modal.classList.add('hidden');
+    };
+
+    document.getElementById('btn-abrir-editar-perfil')?.addEventListener('click', abrirModal);
+    document.getElementById('btn-alerta-editar-perfil')?.addEventListener('click', abrirModal);
+    document.getElementById('btn-fechar-editar-perfil')?.addEventListener('click', fecharModal);
+    document.getElementById('btn-cancelar-editar-perfil')?.addEventListener('click', fecharModal);
+    document.getElementById('backdrop-editar-perfil')?.addEventListener('click', fecharModal);
+
+    const form = document.getElementById('form-editar-perfil');
+    if (form) {
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btn-salvar-dados-perfil');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+            const nome = document.getElementById('perfil-nome').value.trim();
+            const tipoPessoa = document.getElementById('perfil-tipo-pessoa').value;
+            const documento = document.getElementById('perfil-documento').value.trim();
+            const telefone = document.getElementById('perfil-telefone').value.trim();
+            const cidade = document.getElementById('perfil-cidade').value.trim();
+            const estado = document.getElementById('perfil-estado').value.trim().toUpperCase();
+            const bio = document.getElementById('perfil-bio').value.trim();
+            const chavePix = document.getElementById('perfil-chave-pix').value.trim();
+            const radioTipo = modal.querySelector('input[name="editar-perfil-tipo"]:checked');
+            const tipo = radioTipo ? radioTipo.value : (userData.tipo || 'solicitante');
+
+            const dadosAtualizados = {
+                nome,
+                tipoPessoa,
+                documento,
+                telefone,
+                cidade,
+                estado,
+                bio,
+                chavePix,
+                tipo,
+                atualizadoEm: serverTimestamp()
+            };
+
+            try {
+                await updateDoc(doc(db, "usuarios", userData.uid), dadosAtualizados);
+                Object.assign(userData, dadosAtualizados);
+                fecharModal();
+                alert("Dados cadastrais atualizados com sucesso!");
+                renderDashboard(userData);
+            } catch (err) {
+                console.error("Erro ao atualizar perfil:", err);
+                alert("Erro ao salvar dados cadastrais: " + err.message);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = 'Salvar Alterações';
+            }
+        };
+    }
+}
+
+// ==========================================
+// Catálogo de Serviços Profissionais
+// ==========================================
+async function carregarCatalogo(currentUserData) {
+    const grid = document.getElementById('catalogo-grid');
+    const selectCat = document.getElementById('catalogo-categoria-filtro');
+    const searchInput = document.getElementById('catalogo-search');
+    if (!grid) return;
+
+    if (selectCat && selectCat.options.length <= 1) {
+        selectCat.innerHTML = '<option value="">Todas as Categorias</option>';
+        for (const cat in TAXONOMIA) {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat;
+            selectCat.appendChild(opt);
+        }
+    }
+
+    grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando catálogo de serviços...</div>';
+
+    try {
+        const srvSnap = await getDocs(collection(db, "servicos_avulsos"));
+        if (srvSnap.empty) {
+            grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500 text-sm">Nenhum serviço disponível no catálogo no momento.</div>';
+            return;
+        }
+
+        const prestadoresMap = {};
+        const usuariosSnap = await getDocs(collection(db, "usuarios"));
+        usuariosSnap.forEach(d => {
+            prestadoresMap[d.id] = { id: d.id, ...d.data() };
+        });
+
+        const servicos = [];
+        srvSnap.forEach(d => {
+            const s = { id: d.id, ...d.data() };
+            if (s.ativo !== false) {
+                servicos.push(s);
+            }
+        });
+
+        servicos.sort((a, b) => {
+            const ta = a.criadoEm ? a.criadoEm.toMillis() : 0;
+            const tb = b.criadoEm ? b.criadoEm.toMillis() : 0;
+            return tb - ta;
+        });
+
+        const renderGrid = () => {
+            const catFiltro = selectCat ? selectCat.value : '';
+            const termoBusca = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            const filtrados = servicos.filter(s => {
+                if (catFiltro && s.categoria !== catFiltro) return false;
+                if (termoBusca) {
+                    const matchTitulo = (s.titulo || '').toLowerCase().includes(termoBusca);
+                    const matchDesc = (s.descricao || '').toLowerCase().includes(termoBusca);
+                    const matchCat = (s.categoria || '').toLowerCase().includes(termoBusca);
+                    const matchSub = (s.subcategoria || '').toLowerCase().includes(termoBusca);
+                    if (!matchTitulo && !matchDesc && !matchCat && !matchSub) return false;
+                }
+                return true;
+            });
+
+            if (filtrados.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500 text-sm">Nenhum serviço encontrado para os filtros selecionados.</div>';
+                return;
+            }
+
+            let html = '';
+            filtrados.forEach(s => {
+                const prestador = prestadoresMap[s.prestador_uid] || { nome: 'Profissional', notaMedia: 5.0, totalAvaliacoes: 0, foto: '' };
+                const valorFormatado = s.valor_base ? `R$ ${s.valor_base.toFixed(2).replace('.', ',')}` : 'Sob Consulta';
+                const foto = prestador.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(prestador.nome || 'P')}&background=0D8ABC&color=fff`;
+                const nota = prestador.notaMedia ? Number(prestador.notaMedia).toFixed(1) : '5.0';
+
+                html += `
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-lg transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full truncate max-w-[200px]" title="${s.categoria} › ${s.subcategoria}">
+                                    ${s.categoria} &rsaquo; ${s.subcategoria}
+                                </span>
+                                <span class="text-sm font-black text-emerald-700 shrink-0">${valorFormatado}</span>
+                            </div>
+                            <h4 class="text-base font-bold text-gray-900 mb-1 line-clamp-1" title="${s.titulo}">${s.titulo}</h4>
+                            <p class="text-xs text-gray-600 line-clamp-3 mb-4">${s.descricao}</p>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100 mt-2">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <img src="${foto}" class="w-8 h-8 rounded-full object-cover border border-gray-200">
+                                    <div class="truncate max-w-[120px]">
+                                        <span class="text-xs font-bold text-gray-900 block truncate">${prestador.nome}</span>
+                                        <span class="text-[10px] text-gray-400 block">${prestador.cidade ? `${prestador.cidade}-${prestador.estado || ''}` : 'Brasil'}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-bold text-amber-500 flex items-center gap-0.5">
+                                        <i class="fas fa-star text-[10px]"></i> ${nota}
+                                    </span>
+                                    <span class="text-[10px] text-gray-400">(${prestador.totalAvaliacoes || 0} aval.)</span>
+                                </div>
+                            </div>
+                            <button class="btn-ver-detalhes-catalogo w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                data-id="${s.id}">
+                                <i class="fas fa-eye"></i> Detalhes & Contratar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+
+            grid.querySelectorAll('.btn-ver-detalhes-catalogo').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const servId = btn.getAttribute('data-id');
+                    const serv = servicos.find(item => item.id === servId);
+                    if (serv) {
+                        const prest = prestadoresMap[serv.prestador_uid] || { nome: 'Profissional' };
+                        abrirModalDetalhesServico(serv, prest, currentUserData);
+                    }
+                });
+            });
+        };
+
+        renderGrid();
+
+        if (selectCat) selectCat.onchange = renderGrid;
+        if (searchInput) searchInput.oninput = renderGrid;
+
+    } catch (e) {
+        console.error("Erro ao carregar catálogo:", e);
+        grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500 text-sm">Erro ao carregar serviços do catálogo.</div>';
+    }
+}
+
+async function abrirModalDetalhesServico(servico, prestador, currentUserData) {
+    const modal = document.getElementById('modal-detalhes-catalogo');
+    if (!modal) return;
+
+    document.getElementById('detalhes-servico-categoria').textContent = `${servico.categoria} › ${servico.subcategoria}`;
+    document.getElementById('detalhes-servico-titulo').textContent = servico.titulo;
+    document.getElementById('detalhes-servico-preco').textContent = servico.valor_base ? `R$ ${servico.valor_base.toFixed(2).replace('.', ',')}` : 'Sob Consulta';
+    document.getElementById('detalhes-servico-descricao').textContent = servico.descricao;
+
+    const foto = prestador.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(prestador.nome || 'P')}&background=0D8ABC&color=fff`;
+    document.getElementById('detalhes-prestador-foto').src = foto;
+    document.getElementById('detalhes-prestador-nome').textContent = prestador.nome || 'Profissional';
+    document.getElementById('detalhes-prestador-cidade').textContent = prestador.cidade ? `${prestador.cidade} - ${prestador.estado || ''}` : 'Brasil';
+    document.getElementById('detalhes-prestador-avaliacao').innerHTML = `<i class="fas fa-star text-xs"></i> ${prestador.notaMedia ? Number(prestador.notaMedia).toFixed(1) : '5.0'} (${prestador.totalAvaliacoes || 0} avaliações)`;
+    document.getElementById('detalhes-prestador-bio').textContent = prestador.bio || 'Profissional cadastrado na plataforma com atendimento transparente e qualificado.';
+
+    const btnWhats = document.getElementById('btn-whatsapp-prestador');
+    if (btnWhats) {
+        const fone = (prestador.telefone || '').replace(/\D/g, '');
+        if (fone) {
+            const msg = encodeURIComponent(`Olá ${prestador.nome}, encontrei seu serviço "${servico.titulo}" no aplicativo ServiçosApp e gostaria de solicitar mais informações.`);
+            btnWhats.href = `https://wa.me/55${fone}?text=${msg}`;
+        } else {
+            btnWhats.href = `https://wa.me/?text=${encodeURIComponent(`Olá, vi o serviço "${servico.titulo}" no ServiçosApp!`)}`;
+        }
+    }
+
+    const avalContainer = document.getElementById('detalhes-avaliacoes-lista');
+    if (avalContainer) {
+        avalContainer.innerHTML = '<div class="text-xs text-gray-400 py-2"><i class="fas fa-spinner fa-spin mr-1"></i> Carregando avaliações...</div>';
+        try {
+            const qAval = query(collection(db, "avaliacoes"), where("prestadorId", "==", servico.prestador_uid));
+            const avalSnap = await getDocs(qAval);
+            if (avalSnap.empty) {
+                avalContainer.innerHTML = '<p class="text-xs text-gray-500 italic py-1">Nenhuma avaliação detalhada ainda. Seja o primeiro a contratar e avaliar!</p>';
+            } else {
+                let htmlAval = '';
+                avalSnap.forEach(d => {
+                    const av = d.data();
+                    let estrelas = '';
+                    for (let i = 1; i <= 5; i++) {
+                        estrelas += `<i class="fas fa-star text-[10px] ${i <= (av.nota || 5) ? 'text-amber-400' : 'text-gray-200'}"></i>`;
+                    }
+                    htmlAval += `
+                        <div class="bg-gray-50 border border-gray-100 rounded-lg p-2.5">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex gap-0.5">${estrelas}</div>
+                                <span class="text-[10px] text-gray-400">Avaliação verificada</span>
+                            </div>
+                            <p class="text-xs text-gray-700 italic">"${av.comentario || 'Ótimo serviço prestado!'}"</p>
+                        </div>
+                    `;
+                });
+                avalContainer.innerHTML = htmlAval;
+            }
+        } catch (e) {
+            console.error(e);
+            avalContainer.innerHTML = '<p class="text-xs text-gray-400">Avaliações do prestador indisponíveis no momento.</p>';
+        }
+    }
+
+    const btnContratar = document.getElementById('btn-contratar-servico-direto');
+    if (btnContratar) {
+        btnContratar.onclick = async () => {
+            if (!confirm(`Deseja confirmar a contratação direta do serviço "${servico.titulo}" com ${prestador.nome}?`)) return;
+
+            btnContratar.disabled = true;
+            btnContratar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Contratando...';
+
+            try {
+                const user = auth.currentUser;
+                if (!user) throw new Error("Você precisa estar conectado para contratar.");
+
+                await addDoc(collection(db, "solicitacoes"), {
+                    solicitanteId: user.uid,
+                    nomeSolicitante: user.displayName || 'Cliente',
+                    titulo: `Contratação Direta: ${servico.titulo}`,
+                    categoria: servico.categoria,
+                    subcategoria: servico.subcategoria,
+                    descricao: `Contratação direta efetuada via Catálogo de Serviços.\n\nServiço: ${servico.titulo}\nValor Base: R$ ${servico.valor_base ? servico.valor_base.toFixed(2) : 'A combinar'}\n\nDetalhes:\n${servico.descricao}`,
+                    endereco: currentUserData.cidade ? `${currentUserData.cidade} - ${currentUserData.estado || ''}` : 'Região do Solicitante',
+                    status: "CONTRATADA",
+                    prestadorContratadoId: servico.prestador_uid,
+                    origem: "CATALOGO_DIRETO",
+                    servicoOriginalId: servico.id,
+                    criadoEm: serverTimestamp()
+                });
+
+                const prestadorRef = doc(db, "usuarios", servico.prestador_uid);
+                const prestadorSnap = await getDoc(prestadorRef);
+                if (prestadorSnap.exists()) {
+                    const d = prestadorSnap.data();
+                    await updateDoc(prestadorRef, {
+                        pontos: (d.pontos || 0) + 15,
+                        servicos_concluidos: (d.servicos_concluidos || 0) + 1
+                    });
+                }
+
+                modal.classList.add('hidden');
+                alert(`Parabéns! Você contratou "${servico.titulo}" diretamente com ${prestador.nome}. O serviço foi adicionado à sua aba "Minhas Solicitações", onde você poderá finalizá-lo e avaliá-lo.`);
+
+                const tabSolBtn = document.querySelector('.tab-button[data-target="tab-solicitante"]');
+                if (tabSolBtn) {
+                    tabSolBtn.click();
+                } else {
+                    carregarMinhasSolicitacoes(user.uid);
+                }
+
+            } catch (err) {
+                console.error("Erro ao contratar:", err);
+                alert("Erro ao contratar serviço: " + err.message);
+            } finally {
+                btnContratar.disabled = false;
+                btnContratar.innerHTML = '<i class="fas fa-check-circle mr-1.5"></i> Contratar Serviço';
+            }
+        };
+    }
+
+    const fechar = () => modal.classList.add('hidden');
+    document.getElementById('btn-fechar-detalhes-catalogo')?.addEventListener('click', fechar);
+    document.getElementById('backdrop-detalhes-catalogo')?.addEventListener('click', fechar);
+
+    modal.classList.remove('hidden');
 }
 
 async function carregarUsuariosLista() {
@@ -1213,70 +1709,144 @@ async function carregarMeusOrcamentos(uid, chavePix) {
         const q = query(collection(db, "orcamentos"), where("prestadorId", "==", uid));
         const querySnapshot = await getDocs(q);
         
-        if (querySnapshot.empty) {
-            listContainer.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm">Você ainda não enviou orçamentos.</div>';
-            return;
-        }
-        
         let orcamentos = [];
         querySnapshot.forEach(doc => orcamentos.push({ id: doc.id, ...doc.data() }));
-        orcamentos.sort((a, b) => b.criadoEm - a.criadoEm); // Mais recentes primeiro
-        
-        let html = '';
-        for (const o of orcamentos) {
-            let statusBadge = '';
-            if (o.status === 'APROVADO') statusBadge = '<span class="inline-block px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-md">APROVADO</span>';
-            else if (o.status === 'REPROVADO') statusBadge = '<span class="inline-block px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-md">REPROVADO</span>';
-            else statusBadge = '<span class="inline-block px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-md">AGUARDANDO</span>';
+        orcamentos.sort((a, b) => {
+            const ta = a.criadoEm ? a.criadoEm.toMillis() : 0;
+            const tb = b.criadoEm ? b.criadoEm.toMillis() : 0;
+            return tb - ta;
+        });
 
-            const valorFormatado = `R$ ${o.total.toFixed(2).replace('.', ',')}`;
-            
-            // Buscar titulo da solicitacao
-            let tituloSol = 'Solicitação Excluída ou Não Encontrada';
+        // 1. Calcular Métricas de Desempenho
+        const totalOrcamentos = orcamentos.length;
+        const aprovados = orcamentos.filter(o => o.status === 'APROVADO');
+        const aguardando = orcamentos.filter(o => o.status === 'AGUARDANDO');
+        const reprovados = orcamentos.filter(o => o.status === 'REPROVADO');
+        
+        const taxaAprovacao = totalOrcamentos > 0 ? ((aprovados.length / totalOrcamentos) * 100).toFixed(0) : 0;
+        const somaTotal = orcamentos.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+        const ticketMedio = totalOrcamentos > 0 ? (somaTotal / totalOrcamentos).toFixed(2) : '0,00';
+        const totalFechado = aprovados.reduce((acc, o) => acc + (Number(o.total) || 0), 0).toFixed(2);
+
+        const elTotal = document.getElementById('metrica-total-orcamentos');
+        const elTaxa = document.getElementById('metrica-taxa-aprovacao');
+        const elTicket = document.getElementById('metrica-ticket-medio');
+        const elFechado = document.getElementById('metrica-total-fechado');
+
+        if (elTotal) elTotal.textContent = totalOrcamentos;
+        if (elTaxa) elTaxa.textContent = `${taxaAprovacao}%`;
+        if (elTicket) elTicket.textContent = `R$ ${ticketMedio.replace('.', ',')}`;
+        if (elFechado) elFechado.textContent = `R$ ${totalFechado.replace('.', ',')}`;
+
+        // 2. Atualizar Botões de Filtro
+        const btnFiltros = document.querySelectorAll('.btn-filtro-orcamento');
+        btnFiltros.forEach(b => {
+            const st = b.getAttribute('data-status');
+            if (st === 'TODOS') b.textContent = `Todos (${totalOrcamentos})`;
+            else if (st === 'APROVADO') b.textContent = `Aprovados (${aprovados.length})`;
+            else if (st === 'AGUARDANDO') b.textContent = `Aguardando (${aguardando.length})`;
+            else if (st === 'REPROVADO') b.textContent = `Reprovados (${reprovados.length})`;
+        });
+
+        let statusAtivo = 'TODOS';
+
+        // 3. Pré-carregar títulos das solicitações
+        const solicitacoesMap = {};
+        const solIds = [...new Set(orcamentos.map(o => o.solicitacaoId).filter(Boolean))];
+        for (const sId of solIds) {
             try {
-                const solSnap = await getDoc(doc(db, "solicitacoes", o.solicitacaoId));
-                if (solSnap.exists()) {
-                    tituloSol = solSnap.data().titulo;
+                const sDoc = await getDoc(doc(db, "solicitacoes", sId));
+                if (sDoc.exists()) {
+                    solicitacoesMap[sId] = sDoc.data().titulo;
                 }
             } catch(e) {}
-
-            html += `
-                <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="mb-2">${statusBadge}</div>
-                            <h4 class="text-md font-semibold text-gray-900">${tituloSol}</h4>
-                            <p class="text-gray-500 text-sm mt-1">Valor Proposto: ${valorFormatado}</p>
-                        </div>
-                        ${o.status === 'APROVADO' ? `
-                        <button class="btn-gerar-pix bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors mt-2" 
-                            data-id="${o.id}" 
-                            data-titulo="${tituloSol}" 
-                            data-valor="${valorFormatado}">
-                            <i class="fas fa-qrcode mr-1"></i> Cobrança Pix
-                        </button>` : ''}
-                    </div>
-                </div>
-            `;
         }
-        listContainer.innerHTML = html;
 
-        listContainer.querySelectorAll('.btn-gerar-pix').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const target = e.currentTarget;
-                
-                // Recarregar userData para garantir que pegamos a chave atualizada
-                const userSnap = await getDoc(doc(db, "usuarios", uid));
-                const userData = userSnap.data();
-                const currentPix = userData.chavePix;
-                
-                if (!currentPix || currentPix.trim() === '') {
-                    alert("Você precisa cadastrar sua Chave Pix no painel acima antes de gerar a cobrança.");
-                    return;
-                }
-                abrirModalPix(target.dataset.titulo, target.dataset.valor, currentPix);
+        const renderLista = () => {
+            const filtrados = orcamentos.filter(o => {
+                if (statusAtivo === 'TODOS') return true;
+                return o.status === statusAtivo;
             });
+
+            if (filtrados.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <i class="fas fa-file-invoice text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500 text-sm">Nenhum orçamento encontrado com o status "${statusAtivo.toLowerCase()}".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            for (const o of filtrados) {
+                let statusBadge = '';
+                if (o.status === 'APROVADO') statusBadge = '<span class="inline-block px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-md">APROVADO</span>';
+                else if (o.status === 'REPROVADO') statusBadge = '<span class="inline-block px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-md">REPROVADO</span>';
+                else statusBadge = '<span class="inline-block px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-md">AGUARDANDO</span>';
+
+                const valorFormatado = `R$ ${(Number(o.total) || 0).toFixed(2).replace('.', ',')}`;
+                const tituloSol = solicitacoesMap[o.solicitacaoId] || 'Solicitação Aberta';
+
+                html += `
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
+                        <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                            <div>
+                                <div class="mb-2">${statusBadge}</div>
+                                <h4 class="text-md font-semibold text-gray-900">${tituloSol}</h4>
+                                <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                                    <span><strong>Mão de Obra:</strong> R$ ${(Number(o.maoDeObra) || 0).toFixed(2).replace('.', ',')}</span>
+                                    <span><strong>Material:</strong> R$ ${(Number(o.material) || 0).toFixed(2).replace('.', ',')}</span>
+                                    <span><strong>Prazo:</strong> ${o.prazo || 0} dias</span>
+                                </div>
+                                ${o.observacao ? `<p class="mt-2 text-xs text-gray-500 italic bg-gray-50 p-2 rounded-lg border border-gray-100">"${o.observacao}"</p>` : ''}
+                            </div>
+                            <div class="text-right flex flex-col items-end shrink-0">
+                                <span class="text-xl font-black text-gray-900">${valorFormatado}</span>
+                                ${o.status === 'APROVADO' ? `
+                                <button class="btn-gerar-pix bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors mt-2 shadow-xs flex items-center gap-1.5 cursor-pointer" 
+                                    data-id="${o.id}" 
+                                    data-titulo="${tituloSol}" 
+                                    data-valor="${valorFormatado}">
+                                    <i class="fas fa-qrcode"></i> Cobrança Pix / PDF
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            listContainer.innerHTML = html;
+
+            listContainer.querySelectorAll('.btn-gerar-pix').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const target = e.currentTarget;
+                    const userSnap = await getDoc(doc(db, "usuarios", uid));
+                    const userData = userSnap.data();
+                    const currentPix = userData.chavePix;
+                    
+                    if (!currentPix || currentPix.trim() === '') {
+                        alert("Você precisa cadastrar sua Chave Pix no painel acima antes de gerar a cobrança.");
+                        return;
+                    }
+                    abrirModalPix(target.dataset.titulo, target.dataset.valor, currentPix, userData.nome);
+                });
+            });
+        };
+
+        btnFiltros.forEach(btn => {
+            btn.onclick = () => {
+                btnFiltros.forEach(b => {
+                    b.classList.remove('bg-white', 'shadow-2xs', 'text-gray-900');
+                    b.classList.add('text-gray-600');
+                });
+                btn.classList.add('bg-white', 'shadow-2xs', 'text-gray-900');
+                btn.classList.remove('text-gray-600');
+                statusAtivo = btn.getAttribute('data-status');
+                renderLista();
+            };
         });
+
+        renderLista();
         
     } catch (error) {
         console.error("Erro carregarMeusOrcamentos:", error);
@@ -1285,14 +1855,69 @@ async function carregarMeusOrcamentos(uid, chavePix) {
 }
 
 const pixModal = document.getElementById('pix-modal');
-function abrirModalPix(titulo, valor, chavePix) {
+
+function abrirModalPix(titulo, valor, chavePix, nomePrestador = 'Prestador Profissional') {
+    if (!pixModal) return;
+
     document.getElementById('pix-modal-titulo').textContent = titulo;
     document.getElementById('pix-modal-valor').textContent = valor;
     document.getElementById('pix-modal-chave').textContent = chavePix;
-    if (pixModal) pixModal.classList.remove('hidden');
+    document.getElementById('pix-modal-data').textContent = new Date().toLocaleDateString('pt-BR');
+    document.getElementById('pix-modal-subtitulo').textContent = `${nomePrestador} • ServiçosApp Marketplace`;
+
+    // Gera o QR Code Real em imagem
+    const qrImg = document.getElementById('pix-qrcode-img');
+    if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(chavePix)}`;
+    }
+
+    // Botão Copiar Chave Pix
+    const btnCopiar = document.getElementById('btn-copiar-chave-pix');
+    if (btnCopiar) {
+        btnCopiar.onclick = async () => {
+            try {
+                await navigator.clipboard.writeText(chavePix);
+                const originalHtml = btnCopiar.innerHTML;
+                btnCopiar.innerHTML = '<i class="fas fa-check text-green-600 mr-1"></i> Copiado!';
+                setTimeout(() => {
+                    btnCopiar.innerHTML = originalHtml;
+                }, 2000);
+            } catch(e) {
+                prompt("Copie a chave Pix:", chavePix);
+            }
+        };
+    }
+
+    // Botão Compartilhar no WhatsApp
+    const btnWhats = document.getElementById('btn-whatsapp-pix');
+    if (btnWhats) {
+        btnWhats.onclick = () => {
+            const texto = `*DEMONSTRATIVO DE ORÇAMENTO & COBRANÇA PIX*\n\n` +
+                `📌 *Serviço:* ${titulo}\n` +
+                `💵 *Valor Total:* ${valor}\n` +
+                `🔑 *Chave Pix:* ${chavePix}\n` +
+                `👤 *Prestador:* ${nomePrestador}\n\n` +
+                `📲 *Instruções:* Copie a chave Pix acima ou utilize o QR Code do demonstrativo para pagar diretamente pelo app do seu banco.\n\n` +
+                `Agradecemos pela preferência!`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+        };
+    }
+
+    // Botão Baixar / Imprimir PDF
+    const btnPdf = document.getElementById('btn-pdf-pix');
+    if (btnPdf) {
+        btnPdf.onclick = () => {
+            window.print();
+        };
+    }
+
+    pixModal.classList.remove('hidden');
 }
 
 document.getElementById('btn-fechar-pix')?.addEventListener('click', () => {
+    if (pixModal) pixModal.classList.add('hidden');
+});
+document.getElementById('backdrop-pix')?.addEventListener('click', () => {
     if (pixModal) pixModal.classList.add('hidden');
 });
 
@@ -1432,3 +2057,39 @@ if (formAiChat) {
         }
     });
 }
+
+// ==========================================
+// Handlers Globais da Área de Testes (Demo)
+// ==========================================
+function abrirAreaTestes() {
+    // Se o usuário estiver logado e a tab existir, ativa a tab
+    const tabBtn = document.querySelector('.tab-button[data-target="tab-area-testes"]');
+    if (auth.currentUser && tabBtn) {
+        tabBtn.click();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+
+    // Se estiver deslogado ou tela inicial, renderiza direto no mainContent
+    mainContent.innerHTML = '<div id="main-area-testes"></div>';
+    inicializarAreaTestes(db, document.getElementById('main-area-testes'), () => {
+        if (auth.currentUser) {
+            checkUserProfile(auth.currentUser);
+        } else {
+            renderWelcomeScreen();
+        }
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Botão da navbar
+document.getElementById('btn-nav-area-testes')?.addEventListener('click', abrirAreaTestes);
+
+// Clique no logo da navbar volta para home
+document.getElementById('logo-app')?.addEventListener('click', () => {
+    if (auth.currentUser) {
+        checkUserProfile(auth.currentUser);
+    } else {
+        renderWelcomeScreen();
+    }
+});
