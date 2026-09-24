@@ -959,11 +959,266 @@ const SOLICITACOES = [
     status: "CONCLUIDA",
     prestadorContratadoId: "demo_prestador_11",
     diasAtras: 110
+  },
+
+  // --- NOVAS SOLICITAÇÕES EM DIVERSAS ÁREAS ---
+  // ABERTA
+  {
+    id: "demo_solicitacao_26",
+    solicitanteId: "demo_solicitante_01",
+    nomeSolicitante: "Mariana Vasconcelos",
+    titulo: "Troca de chuveiro elétrico blindado e nova fiação 6mm no banheiro",
+    categoria: "ELETRICIDADE",
+    subcategoria: "Instalação de chuveiro",
+    descricao: "O disjuntor cai com frequência durante o banho. Preciso de um eletricista que faça a troca do chuveiro e verifique a bitola dos cabos até o quadro geral.",
+    endereco: "Bela Vista, São Paulo - SP",
+    status: "ABERTA",
+    diasAtras: 1
+  },
+  {
+    id: "demo_solicitacao_27",
+    solicitanteId: "demo_solicitante_02",
+    nomeSolicitante: "Condomínio Residencial Jardins",
+    titulo: "Limpeza completa, aspiração e controle de cloro de piscina 30 mil litros",
+    categoria: "Casa e Jardim",
+    subcategoria: "Piscinas",
+    descricao: "Piscina do condomínio necessitando de aspiração de fundo, escovação e ajuste de alcalinidade antes do final de semana.",
+    endereco: "Jardins, São Paulo - SP",
+    status: "ABERTA",
+    diasAtras: 2
+  },
+  {
+    id: "demo_solicitacao_28",
+    solicitanteId: "demo_solicitante_03",
+    nomeSolicitante: "Lucas Mendonça",
+    titulo: "Revisão ortográfica e formatação ABNT de monografia de pós-graduação",
+    categoria: "Freelancers / Acadêmico",
+    subcategoria: "Revisão",
+    descricao: "Monografia com 52 laudas. Necessito de revisão atenta de concordância, coesão, citações diretas/indiretas e referências bibliográficas.",
+    endereco: "Botafogo, Rio de Janeiro - RJ",
+    status: "ABERTA",
+    diasAtras: 1
+  },
+  {
+    id: "demo_solicitacao_29",
+    solicitanteId: "demo_solicitante_04",
+    nomeSolicitante: "Padaria & Confeitaria Estrela de Minas",
+    titulo: "Instalação de 4 câmeras de segurança IP com monitoramento via celular",
+    categoria: "TI e Redes",
+    subcategoria: "Infraestrutura",
+    descricao: "Instalar câmeras na área de atendimento, estoque e caixa com DVR configurado e acesso em tempo real pelo smartphone do proprietário.",
+    endereco: "Savassi, Belo Horizonte - MG",
+    status: "ABERTA",
+    diasAtras: 3
+  },
+  {
+    id: "demo_solicitacao_30",
+    solicitanteId: "demo_solicitante_05",
+    nomeSolicitante: "Juliana Peixoto",
+    titulo: "Troca de pastilhas de freio dianteiras e sangria do fluido de freio",
+    categoria: "Automotivo",
+    subcategoria: "Freios",
+    descricao: "Carro chiando ao frear em descidas. Quero orçamento para pastilhas de qualidade (cobreq ou ferodo) e mão de obra de substituição.",
+    endereco: "Batel, Curitiba - PR",
+    status: "ABERTA",
+    diasAtras: 2
+  },
+  {
+    id: "demo_solicitacao_31",
+    solicitanteId: "demo_solicitante_06",
+    nomeSolicitante: "Escritório Ribeiro & Associados Advocacia",
+    titulo: "Conserto de vazamento oculto na parede e troca de torneira gourmet",
+    categoria: "Casa e Jardim",
+    subcategoria: "Hidráulica",
+    descricao: "Mancha de umidade surgindo na parede da copa. Necessário geofone ou inspeção hidráulica para identificar vazamento sem quebrar à toa.",
+    endereco: "Moinhos de Vento, Porto Alegre - RS",
+    status: "ABERTA",
+    diasAtras: 1
+  },
+  {
+    id: "demo_solicitacao_32",
+    solicitanteId: "demo_solicitante_07",
+    nomeSolicitante: "Felipe Nogueira",
+    titulo: "Poda artística de árvores ornamentais e corte de grama em chácara",
+    categoria: "Casa e Jardim",
+    subcategoria: "Jardinagem",
+    descricao: "Terreno com grama alta e 6 palmeiras necessitando de poda de folhas secas e limpeza geral dos canteiros.",
+    endereco: "Pituba, Salvador - BA",
+    status: "ABERTA",
+    diasAtras: 2
+  },
+  {
+    id: "demo_solicitacao_33",
+    solicitanteId: "demo_solicitante_08",
+    nomeSolicitante: "Clínica Odontológica Sorriso Bem",
+    titulo: "Pintura lavável acetinada para 4 consultórios e recepção",
+    categoria: "Obras e Reforma",
+    subcategoria: "Pintura",
+    descricao: "Pintura com tinta epóxi/acrílica hospitalar branca para atender normas da vigilância sanitária. Área aproximada de 120m² de parede.",
+    endereco: "Asa Sul, Brasília - DF",
+    status: "ABERTA",
+    diasAtras: 3
+  },
+  {
+    id: "demo_solicitacao_34",
+    solicitanteId: "demo_solicitante_09",
+    nomeSolicitante: "Renata Coimbra",
+    titulo: "Higienização profunda e recarga de gás em 2 aparelhos de ar condicionado",
+    categoria: "Casa e Jardim",
+    subcategoria: "Manutenção",
+    descricao: "Aparelhos de 12.000 BTUs sem gelar adequadamente e acumulando poeira nos filtros. Limpeza química de serpentina e medição de pressão.",
+    endereco: "Boa Viagem, Recife - PE",
+    status: "ABERTA",
+    diasAtras: 1
+  },
+  {
+    id: "demo_solicitacao_35",
+    solicitanteId: "demo_solicitante_10",
+    nomeSolicitante: "Startup InovaTech Soluções Digitais",
+    titulo: "Configuração de rede Wi-Fi 6 empresarial com balanceamento de carga",
+    categoria: "TI e Redes",
+    subcategoria: "Redes",
+    descricao: "Dois links de internet (Vivo e Claro fibra) para operar em failover automático para 30 desenvolvedores sem interrupção de chamadas.",
+    endereco: "Centro, Florianópolis - SC",
+    status: "ABERTA",
+    diasAtras: 2
+  },
+
+  // EM_ANALISE
+  {
+    id: "demo_solicitacao_36",
+    solicitanteId: "demo_solicitante_01",
+    nomeSolicitante: "Mariana Vasconcelos",
+    titulo: "Assentamento de 45m² de porcelanato retificado 84x84 na sala",
+    categoria: "Obras e Reforma",
+    subcategoria: "Pedreiro",
+    descricao: "Contrapiso já nivelado. O serviço inclui recorte nos cantos, espaçadores niveladores e aplicação de rejunte acrílico cinza.",
+    endereco: "Bela Vista, São Paulo - SP",
+    status: "EM_ANALISE",
+    diasAtras: 4
+  },
+  {
+    id: "demo_solicitacao_37",
+    solicitanteId: "demo_solicitante_03",
+    nomeSolicitante: "Lucas Mendonça",
+    titulo: "Diagnóstico de falha elétrica no alternador e bateria de 60Ah",
+    categoria: "Automotivo",
+    subcategoria: "Elétrica automotiva",
+    descricao: "Luz de bateria acendendo no painel após partida. Carro falhando nos faróis altos. Teste de voltagem e reparo do alternador.",
+    endereco: "Botafogo, Rio de Janeiro - RJ",
+    status: "EM_ANALISE",
+    diasAtras: 5
+  },
+  {
+    id: "demo_solicitacao_38",
+    solicitanteId: "demo_solicitante_05",
+    nomeSolicitante: "Juliana Peixoto",
+    titulo: "Troca de HD mecânico lento por SSD NVMe 1TB e reinstalação limpa",
+    categoria: "TI e Redes",
+    subcategoria: "Manutenção de computadores",
+    descricao: "Notebook Dell esquentando e travando na inicialização. Clonagem dos arquivos pessoais e instalação do Windows 11 com drivers atualizados.",
+    endereco: "Batel, Curitiba - PR",
+    status: "EM_ANALISE",
+    diasAtras: 6
+  },
+  {
+    id: "demo_solicitacao_39",
+    solicitanteId: "demo_solicitante_07",
+    nomeSolicitante: "Felipe Nogueira",
+    titulo: "Tradução juramentada/técnica de resumo acadêmico para inglês",
+    categoria: "Freelancers / Acadêmico",
+    subcategoria: "Tradução",
+    descricao: "Artigo sobre neurociência necessitando de tradução de alta fidelidade acadêmica para submissão a periódico internacional.",
+    endereco: "Pituba, Salvador - BA",
+    status: "EM_ANALISE",
+    diasAtras: 5
+  },
+
+  // CONTRATADA
+  {
+    id: "demo_solicitacao_40",
+    solicitanteId: "demo_solicitante_02",
+    nomeSolicitante: "Condomínio Residencial Jardins",
+    titulo: "Adestramento comportamental e controle de latidos para cães",
+    categoria: "Pets e Veterinária",
+    subcategoria: "Adestramento",
+    descricao: "Pacote de 8 aulas para adestramento de 2 cães de moradores em área comum do condomínio para redução de reatividade.",
+    endereco: "Jardins, São Paulo - SP",
+    status: "CONTRATADA",
+    prestadorContratadoId: "demo_prestador_08",
+    diasAtras: 7
+  },
+  {
+    id: "demo_solicitacao_41",
+    solicitanteId: "demo_solicitante_04",
+    nomeSolicitante: "Padaria & Confeitaria Estrela de Minas",
+    titulo: "Cobertura fotográfica profissional e vídeo institucional para redes",
+    categoria: "Eventos e Festas",
+    subcategoria: "Fotografia",
+    descricao: "Ensaio fotográfico de pães especiais, doces artesanais e gravação de reels de 30 segundos da produção para campanha no Instagram.",
+    endereco: "Savassi, Belo Horizonte - MG",
+    status: "CONTRATADA",
+    prestadorContratadoId: "demo_prestador_06",
+    diasAtras: 6
+  },
+  {
+    id: "demo_solicitacao_42",
+    solicitanteId: "demo_solicitante_06",
+    nomeSolicitante: "Escritório Ribeiro & Associados Advocacia",
+    titulo: "Treinamento funcional ergonômico e personal trainer para sócios",
+    categoria: "Saúde e Bem-Estar",
+    subcategoria: "Personal Trainer",
+    descricao: "Acompanhamento físico focado em fortalecimento lombar e postura com 3 sessões semanais no início da manhã.",
+    endereco: "Moinhos de Vento, Porto Alegre - RS",
+    status: "CONTRATADA",
+    prestadorContratadoId: "demo_prestador_15",
+    diasAtras: 8
+  },
+  {
+    id: "demo_solicitacao_43",
+    solicitanteId: "demo_solicitante_08",
+    nomeSolicitante: "Clínica Odontológica Sorriso Bem",
+    titulo: "Criação de logotipo vetorial, cartões e paleta de cores institucional",
+    categoria: "Freelancers / Acadêmico",
+    subcategoria: "Design",
+    descricao: "Redesign completo da marca da clínica transmitindo modernidade, humanização e elegância para fachada e papelaria.",
+    endereco: "Asa Sul, Brasília - DF",
+    status: "CONTRATADA",
+    prestadorContratadoId: "demo_prestador_12",
+    diasAtras: 9
+  },
+
+  // CONCLUIDA
+  {
+    id: "demo_solicitacao_44",
+    solicitanteId: "demo_solicitante_09",
+    nomeSolicitante: "Renata Coimbra",
+    titulo: "Instalação de quadro de distribuição com DPS anti-raio e DR geral",
+    categoria: "ELETRICIDADE",
+    subcategoria: "Instalação elétrica",
+    descricao: "Substituição de quadro antigo de fusíveis por caixa moderna embutida com 12 disjuntores norma DIN e proteção contra queima de eletrônicos.",
+    endereco: "Boa Viagem, Recife - PE",
+    status: "CONCLUIDA",
+    prestadorContratadoId: "demo_prestador_01",
+    diasAtras: 30
+  },
+  {
+    id: "demo_solicitacao_45",
+    solicitanteId: "demo_solicitante_10",
+    nomeSolicitante: "Startup InovaTech Soluções Digitais",
+    titulo: "Reforma de copa e refeitório com drywall acústico e pintura moderna",
+    categoria: "Obras e Reforma",
+    subcategoria: "Reforma",
+    descricao: "Divisória em gesso acartonado com lã de vidro para isolamento sonoro, bancada de granito e pintura lavável.",
+    endereco: "Centro, Florianópolis - SC",
+    status: "CONCLUIDA",
+    prestadorContratadoId: "demo_prestador_03",
+    diasAtras: 45
   }
 ];
 
 // -----------------------------------------------------------------------------
-// 5. 70 ORÇAMENTOS VINCULADOS ÀS SOLICITAÇÕES
+// 5. ORÇAMENTOS VINCULADOS ÀS SOLICITAÇÕES
 // -----------------------------------------------------------------------------
 function gerarOrcamentos() {
   const orcamentos = [];
@@ -975,7 +1230,13 @@ function gerarOrcamentos() {
     "Obras e Reforma": ["demo_prestador_03", "demo_prestador_09", "demo_prestador_13"],
     "Automotivo": ["demo_prestador_04", "demo_prestador_10"],
     "TI e Redes": ["demo_prestador_05", "demo_prestador_11", "demo_prestador_14"],
-    "Freelancers / Acadêmico": ["demo_prestador_06", "demo_prestador_12"]
+    "Freelancers / Acadêmico": ["demo_prestador_06", "demo_prestador_12"],
+    "ELETRICIDADE": ["demo_prestador_01", "demo_prestador_07", "demo_prestador_15"],
+    "CONSTRUÇÃO E REFORMA": ["demo_prestador_03", "demo_prestador_09", "demo_prestador_13"],
+    "TECNOLOGIA": ["demo_prestador_05", "demo_prestador_11", "demo_prestador_14"],
+    "Saúde e Bem-Estar": ["demo_prestador_08", "demo_prestador_12", "demo_prestador_15"],
+    "Eventos e Festas": ["demo_prestador_06", "demo_prestador_12", "demo_prestador_02"],
+    "Pets e Veterinária": ["demo_prestador_08", "demo_prestador_15", "demo_prestador_02"]
   };
 
   const getPrestadorNome = (id) => {

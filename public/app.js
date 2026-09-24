@@ -27,13 +27,16 @@ let btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
 // Taxonomia Base Expandida (PROJETO.md e Fase 2)
 const TAXONOMIA = {
     "Casa e Jardim": ["Jardinagem", "Piscinas", "Limpeza", "Elétrica residencial", "Hidráulica", "Manutenção", "Outros"],
-    "Obras e Reforma": ["Pedreiro", "Pintura", "Reforma", "Instalação", "Acabamento", "Gesseiro", "Outros"],
+    "Obras e Reforma": ["Pedreiro", "Pintura", "Reforma", "Instalação", "Acabamento", "Gesseiro", "Encanador", "Outros"],
     "Automotivo": ["Mecânica", "Elétrica automotiva", "Revisão", "Freios", "Motor", "Funilaria", "Outros"],
-    "TI e Redes": ["Suporte técnico", "Redes", "Infraestrutura", "Desenvolvimento", "Manutenção de computadores", "Outros"],
+    "TI e Redes": ["Suporte técnico", "Redes", "Infraestrutura", "Desenvolvimento", "Manutenção de computadores", "CFTV / Segurança", "Outros"],
     "Freelancers / Acadêmico": ["Design", "Redação", "Revisão", "Formatação", "Tradução", "Serviços acadêmicos", "Outros"],
-    "ELETRICIDADE": ["Instalação elétrica", "Manutenção elétrica", "Instalação de chuveiro", "Tomadas", "Iluminação", "Outros"],
+    "ELETRICIDADE": ["Instalação elétrica", "Manutenção elétrica", "Instalação de chuveiro", "Tomadas", "Iluminação", "Padrão de energia", "Outros"],
     "CONSTRUÇÃO E REFORMA": ["Pedreiro", "Pintor", "Encanador", "Gesseiro", "Azulejista", "Outros"],
-    "TECNOLOGIA": ["Computadores", "Redes", "Suporte técnico", "Desenvolvimento", "Infraestrutura", "Outros"]
+    "TECNOLOGIA": ["Computadores", "Redes", "Suporte técnico", "Desenvolvimento", "Infraestrutura", "Outros"],
+    "Saúde e Bem-Estar": ["Personal Trainer", "Fisioterapia", "Nutrição", "Massoterapia", "Cuidador de Idosos", "Outros"],
+    "Eventos e Festas": ["Fotografia", "Buffet", "DJ e Iluminação", "Decoração", "Garçom", "Outros"],
+    "Pets e Veterinária": ["Adestramento", "Passeador / Pet Sitter", "Banho e Tosa", "Consulta Veterinária", "Outros"]
 };
 
 // Handle Authentication State Changes
@@ -77,6 +80,25 @@ function renderAuthenticatedNav(user) {
 function renderWelcomeScreen() {
     mainContent.innerHTML = `
         <div class="flex flex-col justify-center items-center h-full min-h-[60vh] text-center px-4">
+            <!-- Banner Destaque: Área de Testes -->
+            <div class="w-full max-w-3xl mb-8 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-100 border-2 border-amber-300 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-md text-left">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center shrink-0 shadow-sm text-2xl">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-extrabold text-amber-950 text-base sm:text-lg">Área de Testes & Simulação Demo</h4>
+                            <span class="bg-amber-300 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Acesso Imediato</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-amber-800">Inspecione o ranking de prestadores, catálogo de serviços, dezenas de solicitações e simule concorrência de orçamentos sem precisar de login.</p>
+                    </div>
+                </div>
+                <button id="btn-banner-demo" class="shrink-0 px-5 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white text-xs font-black rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap">
+                    <i class="fas fa-play mr-1.5"></i> Abrir Área de Testes
+                </button>
+            </div>
+
             <div class="bg-blue-50 text-blue-600 p-4 rounded-full mb-6 shadow-xs">
                 <i class="fas fa-tools text-4xl"></i>
             </div>
@@ -90,7 +112,7 @@ function renderWelcomeScreen() {
                 <button id="btn-hero-login" class="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer">
                     <i class="fab fa-google mr-2"></i> Começar Agora
                 </button>
-                <button id="btn-hero-demo" class="inline-flex items-center justify-center px-6 py-3.5 border border-amber-300 text-base font-semibold rounded-lg text-amber-900 bg-amber-50 hover:bg-amber-100 shadow-xs transition-all cursor-pointer">
+                <button id="btn-hero-demo" class="inline-flex items-center justify-center px-6 py-3.5 border-2 border-amber-400 text-base font-bold rounded-lg text-amber-900 bg-amber-50 hover:bg-amber-100 shadow-sm transition-all cursor-pointer">
                     <i class="fas fa-flask mr-2 text-amber-600"></i> Área de Testes (Demo)
                 </button>
             </div>
@@ -98,6 +120,7 @@ function renderWelcomeScreen() {
     `;
     document.getElementById('btn-hero-login').addEventListener('click', login);
     document.getElementById('btn-hero-demo').addEventListener('click', () => abrirAreaTestes(null));
+    document.getElementById('btn-banner-demo')?.addEventListener('click', () => abrirAreaTestes(null));
 }
 
 function renderDashboard(userData) {
