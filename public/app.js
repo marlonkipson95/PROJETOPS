@@ -107,144 +107,199 @@ function renderDashboard(userData) {
     }
 
     mainContent.innerHTML = `
-        <div class="max-w-4xl mx-auto mt-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8 sm:p-10 text-white">
-                    <h1 class="text-3xl font-bold mb-2">Olá, ${userData.nome.split(' ')[0]}! 👋</h1>
-                    <p class="text-blue-100 text-lg">Bem-vindo(a) ao seu painel de controle.</p>
-                </div>
-                
-                <div class="px-6 py-8 sm:p-10">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Seu Perfil Atual</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
-                            <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas ${iconClass} text-xl"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 mb-1">Tipo de Conta</span>
-                            <span class="font-semibold text-gray-900">${tipoTexto}</span>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
-                            <div class="h-12 w-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas fa-star text-xl"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 mb-1">Pontos Acumulados</span>
-                            <span class="font-semibold text-gray-900">${userData.pontos || 0}</span>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
-                            <div class="h-12 w-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas fa-check-circle text-xl"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 mb-1">Serviços Concluídos</span>
-                            <span class="font-semibold text-gray-900">${userData.servicos_concluidos || 0}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-10 flex flex-col sm:flex-row gap-4">
-                        ${(userData.tipo === 'solicitante' || userData.tipo === 'ambos') 
-                            ? `<button id="btn-nova-solicitacao" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors shadow-sm text-center">
-                                 <i class="fas fa-plus mr-2"></i> Nova Solicitação
-                               </button>` 
-                            : ''}
-                        
-                        ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') 
-                            ? `<button id="btn-buscar-solicitacoes" class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors shadow-sm text-center">
-                                 <i class="fas fa-search mr-2"></i> Buscar Solicitações
-                               </button>` 
-                            : ''}
-                    </div>
-
+        <div class="max-w-7xl mx-auto mt-4 pb-12">
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-6 overflow-x-auto">
+                <nav class="-mb-px flex space-x-6 sm:space-x-8 min-w-max" aria-label="Tabs" id="dashboard-tabs">
+                    <button class="tab-button border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-dashboard">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </button>
                     ${(userData.tipo === 'solicitante' || userData.tipo === 'ambos') ? `
-                    <div class="mt-12 pt-8 border-t border-gray-100">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Minhas Solicitações</h3>
-                                <p class="text-sm text-gray-500">Acompanhe os pedidos que você abriu.</p>
-                            </div>
-                        </div>
-                        <div id="minhas-solicitacoes-list" class="space-y-4">
-                            <div class="text-center py-6 text-gray-500 text-sm">Carregando solicitações...</div>
-                        </div>
-                    </div>
+                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-solicitante">
+                        <i class="fas fa-clipboard-list mr-2"></i>Minhas Solicitações
+                    </button>
                     ` : ''}
-                    
                     ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
-                    <div class="mt-12 pt-8 border-t border-gray-100 hidden" id="secao-mural-solicitacoes">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Mural de Solicitações Abertas</h3>
-                                <p class="text-sm text-gray-500">Pedidos aguardando profissionais na plataforma.</p>
-                            </div>
-                        </div>
-                        <div id="mural-solicitacoes-list" class="space-y-4">
-                            <div class="text-center py-6 text-gray-500 text-sm">Carregando mural...</div>
-                        </div>
-                    </div>
+                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-prestador">
+                        <i class="fas fa-toolbox mr-2"></i>Área do Prestador
+                    </button>
                     ` : ''}
+                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-usuarios">
+                        <i class="fas fa-users mr-2"></i>Explorar Usuários
+                    </button>
+                </nav>
+            </div>
 
-                    ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
-                    <div class="mt-12 pt-8 border-t border-gray-100">
-                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-8">
+            <!-- Tab: Dashboard -->
+            <div class="tab-content block" id="tab-dashboard">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8 sm:p-10 text-white">
+                        <h1 class="text-3xl font-bold mb-2">Olá, ${userData.nome.split(' ')[0]}! 👋</h1>
+                        <p class="text-blue-100 text-lg">Bem-vindo(a) ao seu painel de controle.</p>
+                    </div>
+                    <div class="px-6 py-8 sm:p-10">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Seu Perfil Atual</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
+                                <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas ${iconClass} text-xl"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 mb-1">Tipo de Conta</span>
+                                <span class="font-semibold text-gray-900">${tipoTexto}</span>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
+                                <div class="h-12 w-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-star text-xl"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 mb-1">Pontos Acumulados</span>
+                                <span class="font-semibold text-gray-900">${userData.pontos || 0}</span>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col items-center text-center">
+                                <div class="h-12 w-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-check-circle text-xl"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 mb-1">Serviços Concluídos</span>
+                                <span class="font-semibold text-gray-900">${userData.servicos_concluidos || 0}</span>
+                            </div>
+                        </div>
+
+                        ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
+                        <div class="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
                             <h3 class="text-lg font-semibold text-blue-900 mb-2">Sua Chave Pix (Opcional)</h3>
                             <p class="text-sm text-blue-700 mb-4">Cadastre sua chave Pix para gerar demonstrativos de cobrança quando seu orçamento for aprovado.</p>
                             <div class="flex gap-2">
-                                <input type="text" id="input-chave-pix" placeholder="E-mail, CPF, Telefone ou Aleatória" value="${userData.chavePix || ''}" class="flex-grow focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg p-2 border">
+                                <input type="text" id="input-chave-pix" placeholder="E-mail, CPF, Telefone ou Aleatória" value="${userData.chavePix || ''}" class="flex-grow focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg p-2 border bg-white">
                                 <button id="btn-salvar-pix" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors whitespace-nowrap">
                                     Salvar
                                 </button>
                             </div>
                         </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
 
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Meus Orçamentos Enviados</h3>
-                                <p class="text-sm text-gray-500">Acompanhe o status das suas propostas.</p>
-                            </div>
+            <!-- Tab: Solicitante -->
+            ${(userData.tipo === 'solicitante' || userData.tipo === 'ambos') ? `
+            <div class="tab-content hidden" id="tab-solicitante">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10 mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Minhas Solicitações</h3>
+                            <p class="text-sm text-gray-500">Acompanhe os pedidos que você abriu.</p>
                         </div>
-                        <div id="meus-orcamentos-list" class="space-y-4 mb-12">
-                            <div class="text-center py-6 text-gray-500 text-sm">Carregando orçamentos...</div>
-                        </div>
+                        <button id="btn-nova-solicitacao" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                            <i class="fas fa-plus mr-2"></i> Nova Solicitação
+                        </button>
+                    </div>
+                    <div id="minhas-solicitacoes-list" class="space-y-4">
+                        <div class="text-center py-8 text-gray-500 text-sm">Carregando solicitações...</div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
 
-                        <div class="flex justify-between items-center mb-6">
+            <!-- Tab: Prestador -->
+            ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
+            <div class="tab-content hidden" id="tab-prestador">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10 mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Mural de Solicitações</h3>
+                            <p class="text-sm text-gray-500">Pedidos abertos aguardando propostas.</p>
+                        </div>
+                        <button id="btn-atualizar-mural" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i> Atualizar
+                        </button>
+                    </div>
+                    <div id="mural-solicitacoes-list" class="space-y-4 mb-10">
+                        <div class="text-center py-8 text-gray-500 text-sm">Carregando mural...</div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-8 mb-10">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-bold text-gray-900">Meus Orçamentos Enviados</h3>
+                            <p class="text-sm text-gray-500">Acompanhe o status das suas propostas.</p>
+                        </div>
+                        <div id="meus-orcamentos-list" class="space-y-4">
+                            <div class="text-center py-8 text-gray-500 text-sm">Carregando orçamentos...</div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Meus Serviços Avulsos</h3>
+                                <h3 class="text-xl font-bold text-gray-900">Meus Serviços Avulsos</h3>
                                 <p class="text-sm text-gray-500">Serviços que você oferece diretamente.</p>
                             </div>
-                            <button id="btn-novo-servico" class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors shadow-sm">
-                                <i class="fas fa-plus mr-1"></i> Novo
+                            <button id="btn-novo-servico" class="bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-5 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                                <i class="fas fa-plus mr-2"></i> Novo Serviço
                             </button>
                         </div>
                         <div id="servicos-avulsos-list" class="space-y-4">
-                            <div class="text-center py-6 text-gray-500 text-sm">Carregando serviços...</div>
+                            <div class="text-center py-8 text-gray-500 text-sm">Carregando serviços...</div>
                         </div>
                     </div>
-                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Tab: Usuários -->
+            <div class="tab-content hidden" id="tab-usuarios">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10 mb-6">
+                    <div class="mb-6 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Explorar Usuários</h3>
+                            <p class="text-sm text-gray-500">Diretório de usuários cadastrados na plataforma (Visão Administrativa/Teste).</p>
+                        </div>
+                        <button id="btn-atualizar-usuarios" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i> Atualizar
+                        </button>
+                    </div>
+                    <div id="usuarios-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="col-span-full text-center py-8 text-gray-500 text-sm">Carregando usuários...</div>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 
+    // Tabs Logic
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+            });
+
+            button.classList.remove('border-transparent', 'text-gray-500');
+            button.classList.add('border-blue-500', 'text-blue-600');
+            
+            const target = button.getAttribute('data-target');
+            document.getElementById(target).classList.remove('hidden');
+            document.getElementById(target).classList.add('block');
+        });
+    });
+
     if (userData.tipo === 'solicitante' || userData.tipo === 'ambos') {
-        document.getElementById('btn-nova-solicitacao').addEventListener('click', abrirModalSolicitacao);
+        const btnNova = document.getElementById('btn-nova-solicitacao');
+        if (btnNova) btnNova.addEventListener('click', abrirModalSolicitacao);
         carregarMinhasSolicitacoes(userData.uid);
     }
 
     if (userData.tipo === 'prestador' || userData.tipo === 'ambos') {
-        document.getElementById('btn-novo-servico').addEventListener('click', abrirModalServico);
+        const btnNovoSrv = document.getElementById('btn-novo-servico');
+        if (btnNovoSrv) btnNovoSrv.addEventListener('click', abrirModalServico);
         
-        const btnBuscar = document.getElementById('btn-buscar-solicitacoes');
-        if (btnBuscar) {
-            btnBuscar.addEventListener('click', () => {
-                const mural = document.getElementById('secao-mural-solicitacoes');
-                mural.classList.toggle('hidden');
-                if (!mural.classList.contains('hidden')) {
-                    carregarMuralSolicitacoes();
-                }
-            });
-        }
+        const btnMural = document.getElementById('btn-atualizar-mural');
+        if (btnMural) btnMural.addEventListener('click', carregarMuralSolicitacoes);
         
         const btnSalvarPix = document.getElementById('btn-salvar-pix');
         if (btnSalvarPix) {
@@ -263,8 +318,57 @@ function renderDashboard(userData) {
             });
         }
 
+        carregarMuralSolicitacoes();
         carregarMeusOrcamentos(userData.uid, userData.chavePix);
         carregarServicosAvulsos(userData.uid);
+    }
+
+    // Load Users automatically
+    carregarUsuariosLista();
+    document.getElementById('btn-atualizar-usuarios').addEventListener('click', carregarUsuariosLista);
+}
+
+async function carregarUsuariosLista() {
+    const listContainer = document.getElementById('usuarios-list');
+    if (!listContainer) return;
+    
+    try {
+        const querySnapshot = await getDocs(collection(db, "usuarios"));
+        
+        if (querySnapshot.empty) {
+            listContainer.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">Nenhum usuário encontrado.</div>';
+            return;
+        }
+        
+        let html = '';
+        querySnapshot.forEach(doc => {
+            const u = doc.data();
+            const date = u.criadoEm ? new Date(u.criadoEm.toMillis()).toLocaleDateString('pt-BR') : 'Data desconhecida';
+            
+            html += `
+                <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <img class="h-12 w-12 rounded-full object-cover bg-gray-100" src="${u.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.nome || 'U') + '&background=0D8ABC&color=fff'}" alt="Foto do usuário">
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-900 truncate" title="${u.nome}">${u.nome}</h4>
+                            <p class="text-sm text-gray-500 truncate">${u.email || 'Sem e-mail'}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full font-medium"><i class="fas fa-tag mr-1"></i> ${u.tipo === 'ambos' ? 'Solicitante & Prestador' : (u.tipo === 'prestador' ? 'Prestador' : 'Solicitante')}</span>
+                        <span class="px-2 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs rounded-full font-medium"><i class="fas fa-star mr-1"></i> ${u.pontos || 0} pts</span>
+                    </div>
+                    <div class="text-xs text-gray-400">
+                        <i class="far fa-calendar-alt mr-1"></i> Registrado em: ${date}
+                    </div>
+                </div>
+            `;
+        });
+        
+        listContainer.innerHTML = html;
+    } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+        listContainer.innerHTML = '<div class="col-span-full text-center py-8 text-red-500">Erro ao carregar usuários.</div>';
     }
 }
 
@@ -875,11 +979,11 @@ async function abrirModalVerOrcamentos(solicitacaoId) {
         let temAprovado = orcamentos.some(o => o.status === 'APROVADO');
 
         orcamentos.forEach((o) => {
-            const valorFormatado = \`R$ \${o.total.toFixed(2).replace('.', ',')}\`;
+            const valorFormatado = `R$ ${o.total.toFixed(2).replace('.', ',')}`;
             const btnAprovar = (!temAprovado && o.status === 'AGUARDANDO') ? 
-                \`<button class="btn-aprovar-orcamento mt-3 w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors" data-id="\${o.id}" data-solicitacao="\${solicitacaoId}">
+                `<button class="btn-aprovar-orcamento mt-3 w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors" data-id="${o.id}" data-solicitacao="${solicitacaoId}">
                     Aceitar Proposta
-                </button>\` : '';
+                </button>` : '';
 
             let statusBadge = '';
             if (o.status === 'APROVADO') {
@@ -888,28 +992,28 @@ async function abrirModalVerOrcamentos(solicitacaoId) {
                 statusBadge = '<span class="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-md">REPROVADO</span>';
             }
 
-            html += \`
+            html += `
                 <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
                     <div class="flex justify-between items-start">
                         <div class="flex-grow">
                             <div class="flex justify-between items-center mb-1">
-                                <h4 class="text-md font-semibold text-gray-900">\${o.nomePrestador}</h4>
-                                \${statusBadge}
+                                <h4 class="text-md font-semibold text-gray-900">${o.nomePrestador}</h4>
+                                ${statusBadge}
                             </div>
                             <div class="text-sm text-gray-600 grid grid-cols-2 gap-2 mt-2">
-                                <div><span class="font-medium">Mão de Obra:</span> R$ \${o.maoDeObra.toFixed(2).replace('.', ',')}</div>
-                                <div><span class="font-medium">Material:</span> R$ \${o.material.toFixed(2).replace('.', ',')}</div>
-                                <div><span class="font-medium">Prazo:</span> \${o.prazo} dias</div>
+                                <div><span class="font-medium">Mão de Obra:</span> R$ ${o.maoDeObra.toFixed(2).replace('.', ',')}</div>
+                                <div><span class="font-medium">Material:</span> R$ ${o.material.toFixed(2).replace('.', ',')}</div>
+                                <div><span class="font-medium">Prazo:</span> ${o.prazo} dias</div>
                             </div>
-                            \${o.observacao ? \`<p class="mt-2 text-sm text-gray-500 italic bg-white p-2 border border-gray-100 rounded-lg">"\${o.observacao}"</p>\` : ''}
+                            ${o.observacao ? `<p class="mt-2 text-sm text-gray-500 italic bg-white p-2 border border-gray-100 rounded-lg">"${o.observacao}"</p>` : ''}
                         </div>
                         <div class="text-right ml-4 flex flex-col items-end justify-center h-full pt-6">
-                            <span class="block text-lg font-bold text-gray-900">\${valorFormatado}</span>
+                            <span class="block text-lg font-bold text-gray-900">${valorFormatado}</span>
                         </div>
                     </div>
-                    \${btnAprovar}
+                    ${btnAprovar}
                 </div>
-            \`;
+            `;
         });
         
         listContainer.innerHTML = html;
@@ -1125,7 +1229,7 @@ async function carregarMeusOrcamentos(uid, chavePix) {
             else if (o.status === 'REPROVADO') statusBadge = '<span class="inline-block px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-md">REPROVADO</span>';
             else statusBadge = '<span class="inline-block px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-md">AGUARDANDO</span>';
 
-            const valorFormatado = \`R$ \${o.total.toFixed(2).replace('.', ',')}\`;
+            const valorFormatado = `R$ ${o.total.toFixed(2).replace('.', ',')}`;
             
             // Buscar titulo da solicitacao
             let tituloSol = 'Solicitação Excluída ou Não Encontrada';
@@ -1136,24 +1240,24 @@ async function carregarMeusOrcamentos(uid, chavePix) {
                 }
             } catch(e) {}
 
-            html += \`
+            html += `
                 <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
-                            <div class="mb-2">\${statusBadge}</div>
-                            <h4 class="text-md font-semibold text-gray-900">\${tituloSol}</h4>
-                            <p class="text-gray-500 text-sm mt-1">Valor Proposto: \${valorFormatado}</p>
+                            <div class="mb-2">${statusBadge}</div>
+                            <h4 class="text-md font-semibold text-gray-900">${tituloSol}</h4>
+                            <p class="text-gray-500 text-sm mt-1">Valor Proposto: ${valorFormatado}</p>
                         </div>
-                        \${o.status === 'APROVADO' ? \`
+                        ${o.status === 'APROVADO' ? `
                         <button class="btn-gerar-pix bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors mt-2" 
-                            data-id="\${o.id}" 
-                            data-titulo="\${tituloSol}" 
-                            data-valor="\${valorFormatado}">
+                            data-id="${o.id}" 
+                            data-titulo="${tituloSol}" 
+                            data-valor="${valorFormatado}">
                             <i class="fas fa-qrcode mr-1"></i> Cobrança Pix
-                        </button>\` : ''}
+                        </button>` : ''}
                     </div>
                 </div>
-            \`;
+            `;
         }
         listContainer.innerHTML = html;
 
@@ -1226,23 +1330,23 @@ function appendMessage(role, content) {
     
     if (isUser) {
         // User bubble
-        avatarHTML = \`
+        avatarHTML = `
             <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
                 <i class="fas fa-user text-indigo-600 text-sm"></i>
             </div>
-        \`;
+        `;
         bubbleClass = 'bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-sm whitespace-pre-wrap';
-        div.innerHTML = \`
-            \${avatarHTML}
-            <div class="\${bubbleClass}">\${content}</div>
-        \`;
+        div.innerHTML = `
+            ${avatarHTML}
+            <div class="${bubbleClass}">${content}</div>
+        `;
     } else {
         // AI bubble
-        avatarHTML = \`
+        avatarHTML = `
             <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
                 <i class="fas fa-robot text-indigo-600 text-sm"></i>
             </div>
-        \`;
+        `;
         bubbleClass = 'bg-white border border-gray-100 p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800 prose prose-sm max-w-none w-full overflow-hidden';
         
         // Use marked se disponivel, senao usa fallback
@@ -1253,10 +1357,10 @@ function appendMessage(role, content) {
             } catch(e) {}
         }
         
-        div.innerHTML = \`
-            \${avatarHTML}
-            <div class="\${bubbleClass}">\${parsedContent}</div>
-        \`;
+        div.innerHTML = `
+            ${avatarHTML}
+            <div class="${bubbleClass}">${parsedContent}</div>
+        `;
     }
     
     chatMessages.appendChild(div);
@@ -1267,7 +1371,7 @@ function appendLoading() {
     const div = document.createElement('div');
     div.id = 'ai-typing-indicator';
     div.className = 'flex items-start gap-2.5';
-    div.innerHTML = \`
+    div.innerHTML = `
         <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
             <i class="fas fa-robot text-indigo-600 text-sm"></i>
         </div>
@@ -1276,7 +1380,7 @@ function appendLoading() {
             <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
             <div class="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
         </div>
-    \`;
+    `;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
