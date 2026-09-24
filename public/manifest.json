@@ -1,0 +1,21 @@
+{
+  "name": "Plataforma de Serviços",
+  "short_name": "ServiçosApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#3b82f6",
+  "description": "Encontre ou ofereça serviços de forma rápida e segura.",
+  "icons": [
+    {
+      "src": "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/anonymous.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/anonymous.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

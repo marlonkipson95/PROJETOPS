@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3b82f6">
+    <title>Plataforma de Serviços</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-xl font-bold text-blue-600 tracking-tight">ServiçosApp</span>
+                </div>
+                <div id="auth-container" class="flex items-center">
+                    <!-- Dynamic auth content injected here -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main id="main-content" class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dynamic content injected here -->
+        <div class="flex justify-center items-center h-full min-h-[50vh]">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+        </div>
+    </main>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-xl leading-6 font-semibold text-gray-900" id="modal-title">Complete seu Cadastro</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-5">Como você deseja utilizar a plataforma?</p>
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                                        <input type="radio" name="perfil-tipo" value="solicitante" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
+                                        <div class="ml-3 flex flex-col">
+                                            <span class="block text-sm font-medium text-gray-900">Quero contratar serviços</span>
+                                            <span class="block text-xs text-gray-500">Busque profissionais para resolver seu problema.</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                                        <input type="radio" name="perfil-tipo" value="prestador" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                        <div class="ml-3 flex flex-col">
+                                            <span class="block text-sm font-medium text-gray-900">Quero prestar serviços</span>
+                                            <span class="block text-xs text-gray-500">Ofereça seus serviços e encontre clientes.</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                                        <input type="radio" name="perfil-tipo" value="ambos" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                        <div class="ml-3 flex flex-col">
+                                            <span class="block text-sm font-medium text-gray-900">Ambos</span>
+                                            <span class="block text-xs text-gray-500">Quero tanto contratar quanto prestar serviços.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                    <button id="btn-salvar-perfil" type="button" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        Salvar Perfil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Serviço Avulso Modal -->
+    <div id="servico-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+                <form id="form-servico">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-xl leading-6 font-semibold text-gray-900 mb-4">Cadastrar Serviço Avulso</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="servico-titulo" class="block text-sm font-medium text-gray-700">Título do Serviço</label>
+                                <input type="text" id="servico-titulo" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="servico-categoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+                                    <select id="servico-categoria" required class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="servico-subcategoria" class="block text-sm font-medium text-gray-700">Subcategoria</label>
+                                    <select id="servico-subcategoria" required disabled class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-50 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">Selecione a categoria antes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="servico-descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
+                                <textarea id="servico-descricao" rows="3" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md p-2"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="servico-valor" class="block text-sm font-medium text-gray-700">Valor Base (Opcional - R$)</label>
+                                <input type="number" step="0.01" min="0" id="servico-valor" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                        <button type="submit" id="btn-salvar-servico" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Salvar Serviço
+                        </button>
+                        <button type="button" id="btn-cancelar-servico" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solicitação Modal -->
+    <div id="solicitacao-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+                <form id="form-solicitacao">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-xl leading-6 font-semibold text-gray-900 mb-4">Nova Solicitação de Serviço</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="solic-titulo" class="block text-sm font-medium text-gray-700">O que você precisa?</label>
+                                <input type="text" id="solic-titulo" placeholder="Ex: Conserto de encanamento vazando" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="solic-categoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+                                    <select id="solic-categoria" required class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">Selecione...</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="solic-subcategoria" class="block text-sm font-medium text-gray-700">Subcategoria</label>
+                                    <select id="solic-subcategoria" required disabled class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-50 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">Selecione a categoria antes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="solic-descricao" class="block text-sm font-medium text-gray-700">Detalhes do problema</label>
+                                <textarea id="solic-descricao" rows="3" placeholder="Descreva o problema ou o que precisa ser feito com o máximo de detalhes." required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md p-2"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label for="solic-endereco" class="block text-sm font-medium text-gray-700">Bairro / Região</label>
+                                <input type="text" id="solic-endereco" placeholder="Ex: Centro, São Paulo - SP" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                        <button type="submit" id="btn-salvar-solic" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Abrir Solicitação
+                        </button>
+                        <button type="button" id="btn-cancelar-solic" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orçamento Modal -->
+    <div id="orcamento-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+                <form id="form-orcamento">
+                    <input type="hidden" id="orcamento-solicitacao-id">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-xl leading-6 font-semibold text-gray-900 mb-4">Enviar Orçamento</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="orc-mao-obra" class="block text-sm font-medium text-gray-700">Mão de Obra (R$)</label>
+                                    <input type="number" step="0.01" min="0" id="orc-mao-obra" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                                </div>
+                                <div>
+                                    <label for="orc-material" class="block text-sm font-medium text-gray-700">Material (R$)</label>
+                                    <input type="number" step="0.01" min="0" id="orc-material" value="0" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="orc-prazo" class="block text-sm font-medium text-gray-700">Prazo Estimado (em dias)</label>
+                                <input type="number" min="1" id="orc-prazo" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                            </div>
+                            <div>
+                                <label for="orc-observacao" class="block text-sm font-medium text-gray-700">Observações / Condições</label>
+                                <textarea id="orc-observacao" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md p-2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                        <button type="submit" id="btn-enviar-orcamento" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Enviar Proposta
+                        </button>
+                        <button type="button" id="btn-cancelar-orcamento" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ver Orçamentos Modal -->
+    <div id="ver-orcamentos-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-xl leading-6 font-semibold text-gray-900 mb-4">Orçamentos Recebidos</h3>
+                    <div id="orcamentos-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        <!-- Content injected here -->
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                    <button type="button" id="btn-fechar-ver-orcamentos" class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avaliação Modal -->
+    <div id="avaliacao-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+                <form id="form-avaliacao">
+                    <input type="hidden" id="avaliacao-solicitacao-id">
+                    <input type="hidden" id="avaliacao-prestador-id">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-xl leading-6 font-semibold text-gray-900 mb-4">Avaliar Prestador</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nota</label>
+                                <div class="flex space-x-2 text-2xl text-gray-300 cursor-pointer" id="star-rating">
+                                    <i class="fas fa-star hover:text-yellow-400 transition-colors" data-val="1"></i>
+                                    <i class="fas fa-star hover:text-yellow-400 transition-colors" data-val="2"></i>
+                                    <i class="fas fa-star hover:text-yellow-400 transition-colors" data-val="3"></i>
+                                    <i class="fas fa-star hover:text-yellow-400 transition-colors" data-val="4"></i>
+                                    <i class="fas fa-star hover:text-yellow-400 transition-colors" data-val="5"></i>
+                                </div>
+                                <input type="hidden" id="avaliacao-nota" value="0" required>
+                            </div>
+                            
+                            <div>
+                                <label for="avaliacao-comentario" class="block text-sm font-medium text-gray-700">Comentário sobre o serviço</label>
+                                <textarea id="avaliacao-comentario" rows="3" placeholder="Conte-nos como foi a experiência..." required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md p-2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                        <button type="submit" id="btn-enviar-avaliacao" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Concluir e Avaliar
+                        </button>
+                        <button type="button" id="btn-cancelar-avaliacao" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pix Modal -->
+    <div id="pix-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-100">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                        <i class="fas fa-qrcode text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-2">Cobrança via Pix</h3>
+                    <p class="text-sm text-gray-500 mb-4" id="pix-modal-titulo">Serviço</p>
+                    
+                    <div class="text-3xl font-bold text-gray-900 mb-6" id="pix-modal-valor">R$ 0,00</div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+                        <p class="text-xs text-gray-500 mb-1 uppercase font-bold">Sua Chave Pix</p>
+                        <p class="text-md font-mono text-gray-800 break-all" id="pix-modal-chave"></p>
+                    </div>
+
+                    <div class="mx-auto w-48 h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4">
+                        <span class="text-gray-400 text-xs">QR Code Simulado</span>
+                    </div>
+                    
+                    <p class="text-xs text-gray-400">
+                        Nesta versão, a transação não é automática. O cliente deverá realizar a transferência para a chave acima.
+                    </p>
+                </div>
+                <div class="bg-gray-50 px-4 py-4 sm:px-6 flex justify-center border-t border-gray-100">
+                    <button type="button" id="btn-fechar-pix" class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assistente IA Modal -->
+    <div id="ai-chat-modal" class="fixed inset-0 z-50 hidden flex flex-col justify-end sm:justify-center items-center pb-4 sm:p-0" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true" id="ai-chat-backdrop"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-2 sm:mx-0 flex flex-col overflow-hidden" style="height: 600px; max-height: 90vh;">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex justify-between items-center text-white">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 p-2 rounded-full">
+                        <i class="fas fa-robot text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg leading-none">Assistente Inteligente</h3>
+                        <span class="text-xs text-indigo-100">Powered by Gemini</span>
+                    </div>
+                </div>
+                <button id="btn-fechar-chat" class="text-white hover:text-indigo-200 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Messages Area -->
+            <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <!-- Message Assistant -->
+                <div class="flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-1">
+                        <i class="fas fa-robot text-indigo-600 text-sm"></i>
+                    </div>
+                    <div class="bg-white border border-gray-100 p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800">
+                        Olá! Sou o Assistente Inteligente da plataforma. Como posso ajudar você hoje? Procurando por algum serviço específico?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="bg-white p-3 border-t border-gray-100">
+                <form id="form-ai-chat" class="flex gap-2">
+                    <input type="text" id="ai-chat-input" placeholder="Digite sua mensagem..." autocomplete="off" class="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-full px-4 py-2 text-sm transition-all">
+                    <button type="submit" id="btn-enviar-chat" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full w-10 h-10 flex items-center justify-center shrink-0 transition-colors shadow-sm disabled:opacity-50">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button for AI -->
+    <button id="btn-open-chat" class="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all focus:outline-none focus:ring-4 focus:ring-purple-300">
+        <i class="fas fa-sparkles text-2xl"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registrado com sucesso:', registration.scope);
+                }).catch(err => {
+                    console.error('Falha no registro do SW:', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
