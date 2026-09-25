@@ -234,31 +234,39 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
         </div>
       </div>
 
-      <!-- Navegação das Abas de Teste com scrollbar oculta -->
-      <div class="border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar">
-        <nav class="-mb-px flex space-x-2 sm:space-x-6 min-w-max" id="demo-tabs-nav">
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-indigo-600 text-indigo-700" data-aba="cenarios">
-            <i class="fas fa-users-cog text-indigo-500"></i> Simulação de Cenários (3 Perfis)
-          </button>
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="ranking">
-            <i class="fas fa-trophy text-amber-500"></i> Ranking Geral (${demoState.prestadores.length || 15})
-          </button>
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="comentarios">
-            <i class="fas fa-comments text-blue-500"></i> Avaliações e Comentários
-          </button>
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="solicitacoes">
-            <i class="fas fa-clipboard-list text-purple-500"></i> Solicitações & Propostas
-          </button>
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="servicos">
-            <i class="fas fa-boxes text-emerald-500"></i> Catálogo de Serviços
-          </button>
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="orcamentos">
-            <i class="fas fa-calculator text-indigo-500"></i> Orçamentos Detalhados
-          </button>
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="fluxo">
-            <i class="fas fa-project-diagram text-rose-500"></i> Ciclo do Marketplace
-          </button>
-        </nav>
+      <!-- Navegação das Abas de Teste com scrollbar elegante e setas de navegação lateral -->
+      <div class="relative mb-6">
+        <button type="button" id="btn-scroll-demo-left" class="hidden md:flex absolute -left-3.5 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white hover:bg-gray-50 border border-gray-300 rounded-full shadow-md items-center justify-center text-gray-700 text-xs transition-all cursor-pointer hover:scale-105 active:scale-95" title="Rolar abas para a esquerda">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="demo-tabs-scroll-container" class="border-b border-gray-200 menu-scrollbar pb-1.5 px-1">
+          <nav class="-mb-px flex space-x-2 sm:space-x-4 min-w-max" id="demo-tabs-nav">
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-indigo-600 text-indigo-700 whitespace-nowrap cursor-pointer" data-aba="cenarios">
+              <i class="fas fa-users-cog text-indigo-500"></i> Simulação de Cenários (3 Perfis)
+            </button>
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap cursor-pointer" data-aba="ranking">
+              <i class="fas fa-trophy text-amber-500"></i> Ranking Geral (${demoState.prestadores.length || 15})
+            </button>
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap cursor-pointer" data-aba="comentarios">
+              <i class="fas fa-comments text-blue-500"></i> Avaliações e Comentários
+            </button>
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap cursor-pointer" data-aba="solicitacoes">
+              <i class="fas fa-clipboard-list text-purple-500"></i> Solicitações & Propostas
+            </button>
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap cursor-pointer" data-aba="servicos">
+              <i class="fas fa-boxes text-emerald-500"></i> Catálogo de Serviços
+            </button>
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap cursor-pointer" data-aba="orcamentos">
+              <i class="fas fa-calculator text-indigo-500"></i> Orçamentos Detalhados
+            </button>
+            <button class="tab-demo-btn py-3 px-3.5 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap cursor-pointer" data-aba="fluxo">
+              <i class="fas fa-project-diagram text-rose-500"></i> Ciclo do Marketplace
+            </button>
+          </nav>
+        </div>
+        <button type="button" id="btn-scroll-demo-right" class="hidden md:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white hover:bg-gray-50 border border-gray-300 rounded-full shadow-md items-center justify-center text-gray-700 text-xs transition-all cursor-pointer hover:scale-105 active:scale-95" title="Rolar abas para a direita">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
 
       <!-- Conteúdo Dinâmico da Aba Selecionada -->
@@ -335,6 +343,21 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
     btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Dados';
     btn.disabled = false;
   });
+
+  // Rolagem suave com setas de navegação das abas da Área de Testes
+  const demoScroll = containerEl.querySelector("#demo-tabs-scroll-container");
+  const btnDemoLeft = containerEl.querySelector("#btn-scroll-demo-left");
+  const btnDemoRight = containerEl.querySelector("#btn-scroll-demo-right");
+  if (btnDemoLeft && demoScroll) {
+    btnDemoLeft.addEventListener("click", () => {
+      demoScroll.scrollBy({ left: -240, behavior: "smooth" });
+    });
+  }
+  if (btnDemoRight && demoScroll) {
+    btnDemoRight.addEventListener("click", () => {
+      demoScroll.scrollBy({ left: 240, behavior: "smooth" });
+    });
+  }
 
   // Listeners dos Cards do Seletor de Cenários
   const btnCenarios = containerEl.querySelectorAll(".btn-trocar-cenario");
@@ -977,8 +1000,8 @@ function renderizarCenario1Solicitante(container) {
           </div>
         </div>
 
-        <!-- Seletor de Sub-Abas do Cenário 1 com scrollbar oculta -->
-        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+        <!-- Seletor de Sub-Abas do Cenário 1 com barra de rolagem suave quando necessário -->
+        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto menu-scrollbar pb-1">
           <button type="button" class="btn-subaba-c1 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'solicitacoes' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="solicitacoes">
             Minhas Demandas
           </button>
@@ -1540,8 +1563,8 @@ Etapa 3: Instalação de barramento bifásico e teste de carga em todos os circu
           </div>
         </div>
 
-        <!-- Seletor de Sub-Abas do Cenário 2 com scrollbar oculta -->
-        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+        <!-- Seletor de Sub-Abas do Cenário 2 com barra de rolagem suave quando necessário -->
+        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto menu-scrollbar pb-1">
           <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'perfil' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="perfil">
             Perfil & Agenda
           </button>
@@ -2526,7 +2549,7 @@ function renderizarOrcamentos(container) {
         </span>
       </div>
 
-      <div class="overflow-x-auto no-scrollbar">
+      <div class="overflow-x-auto menu-scrollbar pb-2">
         <table class="w-full text-left text-xs">
           <thead class="bg-gray-50 text-gray-600 font-semibold border-b border-gray-200">
             <tr>

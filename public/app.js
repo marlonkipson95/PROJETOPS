@@ -224,33 +224,40 @@ function renderDashboard(userData) {
     }
 
     mainContent.innerHTML = `
-        <div class="max-w-7xl mx-auto mt-4 pb-12">
-            <!-- Tabs com scrollbar oculta -->
-            <div class="border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar">
-                <nav class="-mb-px flex space-x-6 sm:space-x-8 min-w-max" aria-label="Tabs" id="dashboard-tabs">
-                    <button class="tab-button border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-dashboard">
-                        <i class="fas fa-home mr-2"></i>Dashboard
-                    </button>
-                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-catalogo">
-                        <i class="fas fa-store mr-2"></i>Catálogo de Serviços
-                    </button>
-                    ${(userData.tipo === 'solicitante' || userData.tipo === 'ambos') ? `
-                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-solicitante">
-                        <i class="fas fa-clipboard-list mr-2"></i>Minhas Solicitações
-                    </button>
-                    ` : ''}
-                    ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
-                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-prestador">
-                        <i class="fas fa-toolbox mr-2"></i>Área do Prestador
-                    </button>
-                    ` : ''}
-                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-usuarios">
-                        <i class="fas fa-users mr-2"></i>Explorar Usuários
-                    </button>
-                    <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-area-testes">
-                        <i class="fas fa-flask text-amber-600 mr-2"></i>Área de Testes <span class="ml-1 px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">Demo</span>
-                    </button>
-                </nav>
+            <!-- Tabs com barra de rolagem moderna e botões laterais de navegação -->
+            <div class="relative mb-6">
+                <button type="button" id="btn-scroll-dash-left" class="hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white hover:bg-gray-50 border border-gray-300 rounded-full shadow-md items-center justify-center text-gray-700 text-xs transition-all cursor-pointer hover:scale-105 active:scale-95" title="Rolar abas para a esquerda">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="dash-tabs-scroll-container" class="border-b border-gray-200 menu-scrollbar pb-1.5 px-1">
+                    <nav class="-mb-px flex space-x-6 sm:space-x-8 min-w-max" aria-label="Tabs" id="dashboard-tabs">
+                        <button class="tab-button border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer" data-target="tab-dashboard">
+                            <i class="fas fa-home mr-2"></i>Dashboard
+                        </button>
+                        <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer" data-target="tab-catalogo">
+                            <i class="fas fa-store mr-2"></i>Catálogo de Serviços
+                        </button>
+                        ${(userData.tipo === 'solicitante' || userData.tipo === 'ambos') ? `
+                        <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer" data-target="tab-solicitante">
+                            <i class="fas fa-clipboard-list mr-2"></i>Minhas Solicitações
+                        </button>
+                        ` : ''}
+                        ${(userData.tipo === 'prestador' || userData.tipo === 'ambos') ? `
+                        <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer" data-target="tab-prestador">
+                            <i class="fas fa-toolbox mr-2"></i>Área do Prestador
+                        </button>
+                        ` : ''}
+                        <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer" data-target="tab-usuarios">
+                            <i class="fas fa-users mr-2"></i>Explorar Usuários
+                        </button>
+                        <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer" data-target="tab-area-testes">
+                            <i class="fas fa-flask text-amber-600 mr-2"></i>Área de Testes <span class="ml-1 px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">Demo</span>
+                        </button>
+                    </nav>
+                </div>
+                <button type="button" id="btn-scroll-dash-right" class="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white hover:bg-gray-50 border border-gray-300 rounded-full shadow-md items-center justify-center text-gray-700 text-xs transition-all cursor-pointer hover:scale-105 active:scale-95" title="Rolar abas para a direita">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
 
             <!-- Tab: Dashboard -->
@@ -538,6 +545,21 @@ function renderDashboard(userData) {
             }
         });
     });
+
+    // Rolagem suave com setas de navegação das abas do Dashboard
+    const dashScroll = document.getElementById('dash-tabs-scroll-container');
+    const btnDashLeft = document.getElementById('btn-scroll-dash-left');
+    const btnDashRight = document.getElementById('btn-scroll-dash-right');
+    if (btnDashLeft && dashScroll) {
+        btnDashLeft.addEventListener('click', () => {
+            dashScroll.scrollBy({ left: -240, behavior: 'smooth' });
+        });
+    }
+    if (btnDashRight && dashScroll) {
+        btnDashRight.addEventListener('click', () => {
+            dashScroll.scrollBy({ left: 240, behavior: 'smooth' });
+        });
+    }
 
     if (userData.tipo === 'solicitante' || userData.tipo === 'ambos') {
         const btnNova = document.getElementById('btn-nova-solicitacao');

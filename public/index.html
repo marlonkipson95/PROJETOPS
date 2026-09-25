@@ -14,7 +14,31 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
 
-        /* Utilitários de remoção de barra de rolagem dos menus/navegadores */
+        /* Utilitários de barra de rolagem elegante para menus horizontais */
+        .menu-scrollbar {
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 rgba(241, 245, 249, 0.6);
+            -webkit-overflow-scrolling: touch;
+        }
+        .menu-scrollbar::-webkit-scrollbar {
+            height: 5px;
+        }
+        .menu-scrollbar::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 0.6);
+            border-radius: 9999px;
+            margin: 0 4px;
+        }
+        .menu-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 9999px;
+        }
+        .menu-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Oculta scrollbar onde estritamente necessário */
         .no-scrollbar::-webkit-scrollbar {
             display: none !important;
         }
@@ -23,7 +47,7 @@
             scrollbar-width: none !important;
         }
 
-        /* Barra de rolagem suave e discreta para caixas de conteúdo */
+        /* Barra de rolagem suave e discreta para caixas de conteúdo verticais */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
