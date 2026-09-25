@@ -1,8 +1,9 @@
-const CACHE_NAME = 'servicos-app-v2';
+const CACHE_NAME = 'servicos-app-v3';
 const urlsToCache = [
   '/',
   '/index.html',
   '/app.js',
+  '/area-testes.js',
   '/manifest.json'
 ];
 
