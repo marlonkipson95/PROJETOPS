@@ -309,61 +309,46 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
 async function carregarTodosDadosDemo(db) {
   demoState.carregando = true;
   try {
-    // 1. Prestadores & Solicitantes (usuários onde isDemo == true ou ID começa com demo_)
-    const usuariosSnap = await getDocs(collection(db, "usuarios"));
+    // 1. Prestadores & Solicitantes (usuários onde isDemo == true)
+    const usuariosSnap = await getDocs(query(collection(db, "usuarios"), where("isDemo", "==", true)));
     const prestadores = [];
     const solicitantes = [];
 
     usuariosSnap.forEach(docSnap => {
       const data = { id: docSnap.id, ...docSnap.data() };
-      const isDemo = data.isDemo === true || docSnap.id.startsWith("demo_");
-      if (isDemo) {
-        if (data.tipo === "prestador" || data.tipo === "ambos" || docSnap.id.startsWith("demo_prestador_")) {
-          prestadores.push(data);
-        } else if (data.tipo === "solicitante" || docSnap.id.startsWith("demo_solicitante_")) {
-          solicitantes.push(data);
-        }
+      if (data.tipo === "prestador" || data.tipo === "ambos" || docSnap.id.startsWith("demo_prestador_")) {
+        prestadores.push(data);
+      } else if (data.tipo === "solicitante" || docSnap.id.startsWith("demo_solicitante_")) {
+        solicitantes.push(data);
       }
     });
 
     // 2. Serviços Avulsos
-    const servicosSnap = await getDocs(collection(db, "servicos_avulsos"));
+    const servicosSnap = await getDocs(query(collection(db, "servicos_avulsos"), where("isDemo", "==", true)));
     const servicos = [];
     servicosSnap.forEach(docSnap => {
-      const data = { id: docSnap.id, ...docSnap.data() };
-      if (data.isDemo === true || docSnap.id.startsWith("demo_")) {
-        servicos.push(data);
-      }
+      servicos.push({ id: docSnap.id, ...docSnap.data() });
     });
 
     // 3. Solicitações
-    const solicitacoesSnap = await getDocs(collection(db, "solicitacoes"));
+    const solicitacoesSnap = await getDocs(query(collection(db, "solicitacoes"), where("isDemo", "==", true)));
     const solicitacoes = [];
     solicitacoesSnap.forEach(docSnap => {
-      const data = { id: docSnap.id, ...docSnap.data() };
-      if (data.isDemo === true || docSnap.id.startsWith("demo_")) {
-        solicitacoes.push(data);
-      }
+      solicitacoes.push({ id: docSnap.id, ...docSnap.data() });
     });
 
     // 4. Orçamentos
-    const orcamentosSnap = await getDocs(collection(db, "orcamentos"));
+    const orcamentosSnap = await getDocs(query(collection(db, "orcamentos"), where("isDemo", "==", true)));
     const orcamentos = [];
     orcamentosSnap.forEach(docSnap => {
-      const data = { id: docSnap.id, ...docSnap.data() };
-      if (data.isDemo === true || docSnap.id.startsWith("demo_")) {
-        orcamentos.push(data);
-      }
+      orcamentos.push({ id: docSnap.id, ...docSnap.data() });
     });
 
     // 5. Avaliações
-    const avaliacoesSnap = await getDocs(collection(db, "avaliacoes"));
+    const avaliacoesSnap = await getDocs(query(collection(db, "avaliacoes"), where("isDemo", "==", true)));
     const avaliacoes = [];
     avaliacoesSnap.forEach(docSnap => {
-      const data = { id: docSnap.id, ...docSnap.data() };
-      if (data.isDemo === true || docSnap.id.startsWith("demo_")) {
-        avaliacoes.push(data);
-      }
+      avaliacoes.push({ id: docSnap.id, ...docSnap.data() });
     });
 
     demoState.prestadores = prestadores;

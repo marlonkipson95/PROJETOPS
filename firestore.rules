@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Funções auxiliares
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDemo() {
+      return resource.data.isDemo == true;
+    }
+
+    // 1. Usuários (Documento direto pelo UID ou Demo)
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated() || isDemo();
+      allow write: if isOwner(userId);
+    }
+
+    // 2. Subcoleções privadas do usuário
+    match /usuarios/{userId}/{subcollection}/{docId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // 3. Regra genérica para qualquer subcoleção cujo segmento seja o UID
+    match /{collection}/{docId}/{userId}/{subDoc=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // 4. Categorias e Subcategorias (Leitura pública para filtros e catálogo)
+    match /categorias/{categoriaId} {
+      allow read: if true;
+      allow write: if false; // Gerenciado via script/admin
+    }
+
+    // 5. Solicitações de Serviço (Autenticado ou Demo)
+    match /solicitacoes/{solicitacaoId} {
+      allow read: if isAuthenticated() || isDemo();
+      allow create: if isAuthenticated() && request.resource.data.solicitanteId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.solicitanteId == request.auth.uid;
+    }
+
+    // 6. Orçamentos (Demo liberado para inspeção de concorrência ou Dono/Contratante autenticado)
+    match /orcamentos/{orcamentoId} {
+      allow read: if isDemo() || (isAuthenticated() && (
+        resource.data.prestadorId == request.auth.uid ||
+        get(/databases/$(database)/documents/solicitacoes/$(resource.data.solicitacaoId)).data.solicitanteId == request.auth.uid
+      ));
+      allow create: if isAuthenticated() && request.resource.data.prestadorId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.prestadorId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // 7. Serviços Avulsos (Catálogo público)
+    match /servicos_avulsos/{servicoId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.prestadorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.prestadorId == request.auth.uid;
+    }
+
+    // 8. Avaliações (Autenticado ou Demo)
+    match /avaliacoes/{avaliacaoId} {
+      allow read: if isAuthenticated() || isDemo();
+      allow create: if isAuthenticated() && request.resource.data.solicitanteId == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}
