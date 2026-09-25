@@ -39,6 +39,84 @@ const TAXONOMIA = {
     "Pets e Veterinária": ["Adestramento", "Passeador / Pet Sitter", "Banho e Tosa", "Consulta Veterinária", "Outros"]
 };
 
+// =============================================================================
+// SISTEMA MODERNO DE NOTIFICAÇÕES (TOASTS) - Substitui alert() nativo
+// =============================================================================
+export function mostrarNotificacao(tipo = 'sucesso', titulo = '', mensagem = '', duracao = 4500) {
+    const container = document.getElementById('toast-container');
+    if (!container) {
+        console.log(`[Toast ${tipo}] ${titulo}: ${mensagem}`);
+        return;
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-item pointer-events-auto flex items-start gap-3 p-4 bg-white rounded-2xl border shadow-xl transition-all duration-300 toast-animate-in';
+
+    let iconHtml = '';
+    let borderClass = 'border-emerald-200';
+    let iconBgClass = 'bg-emerald-50 text-emerald-600';
+    let defaultTitle = 'Sucesso';
+
+    if (tipo === 'erro') {
+        borderClass = 'border-red-200';
+        iconBgClass = 'bg-red-50 text-red-600';
+        iconHtml = '<i class="fas fa-times-circle text-lg"></i>';
+        defaultTitle = 'Erro na Operação';
+    } else if (tipo === 'aviso') {
+        borderClass = 'border-amber-200';
+        iconBgClass = 'bg-amber-50 text-amber-600';
+        iconHtml = '<i class="fas fa-exclamation-triangle text-lg"></i>';
+        defaultTitle = 'Atenção';
+    } else if (tipo === 'info') {
+        borderClass = 'border-blue-200';
+        iconBgClass = 'bg-blue-50 text-blue-600';
+        iconHtml = '<i class="fas fa-info-circle text-lg"></i>';
+        defaultTitle = 'Informação';
+    } else {
+        borderClass = 'border-emerald-200';
+        iconBgClass = 'bg-emerald-50 text-emerald-600';
+        iconHtml = '<i class="fas fa-check-circle text-lg"></i>';
+        defaultTitle = 'Sucesso!';
+    }
+
+    toast.classList.add(borderClass);
+
+    toast.innerHTML = `
+        <div class="w-8 h-8 rounded-full ${iconBgClass} flex items-center justify-center shrink-0 mt-0.5">
+            ${iconHtml}
+        </div>
+        <div class="flex-1 min-w-0 pr-1">
+            <h5 class="text-xs font-bold text-gray-900 leading-tight mb-0.5">${titulo || defaultTitle}</h5>
+            <p class="text-xs text-gray-600 leading-relaxed">${mensagem}</p>
+        </div>
+        <button type="button" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg transition-colors cursor-pointer text-xs" aria-label="Fechar notificação">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    const closeBtn = toast.querySelector('button');
+    const dismiss = () => {
+        toast.classList.remove('toast-animate-in');
+        toast.classList.add('toast-animate-out');
+        setTimeout(() => {
+            if (toast.parentElement) toast.parentElement.removeChild(toast);
+        }, 260);
+    };
+
+    closeBtn.onclick = dismiss;
+    container.appendChild(toast);
+
+    if (duracao > 0) {
+        setTimeout(dismiss, duracao);
+    }
+}
+window.mostrarNotificacao = mostrarNotificacao;
+
+// Garante que qualquer chamada de alert do navegador vire um Toast limpo e elegante
+window.alert = function(msg) {
+    mostrarNotificacao('info', 'Notificação do Sistema', String(msg));
+};
+
 // Handle Authentication State Changes
 onAuthStateChanged(auth, async (user) => {
     const aiWidget = document.getElementById('ai-floating-widget-wrapper');
@@ -147,8 +225,8 @@ function renderDashboard(userData) {
 
     mainContent.innerHTML = `
         <div class="max-w-7xl mx-auto mt-4 pb-12">
-            <!-- Tabs -->
-            <div class="border-b border-gray-200 mb-6 overflow-x-auto">
+            <!-- Tabs com scrollbar oculta -->
+            <div class="border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar">
                 <nav class="-mb-px flex space-x-6 sm:space-x-8 min-w-max" aria-label="Tabs" id="dashboard-tabs">
                     <button class="tab-button border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors" data-target="tab-dashboard">
                         <i class="fas fa-home mr-2"></i>Dashboard
@@ -2311,8 +2389,29 @@ function abrirModalPix(titulo, valor, chavePix, nomePrestador = 'Prestador Profi
         };
     }
 
+    // Controle de Exibição: Somente Especificação vs Checkout Pix Ativo
+    const pixCheckoutSec = document.getElementById('pix-checkout-section');
+    const btnAceitarModal = document.getElementById('btn-aceitar-proposta-modal');
+    
+    if (detalhes.somenteEspecificacao) {
+        if (pixCheckoutSec) pixCheckoutSec.classList.add('hidden');
+        if (btnAceitarModal) {
+            btnAceitarModal.classList.remove('hidden');
+            btnAceitarModal.onclick = () => {
+                if (typeof detalhes.onAceitar === 'function') {
+                    detalhes.onAceitar();
+                }
+            };
+        }
+    } else {
+        if (pixCheckoutSec) pixCheckoutSec.classList.remove('hidden');
+        if (btnAceitarModal) btnAceitarModal.classList.add('hidden');
+    }
+
     pixModal.classList.remove('hidden');
 }
+
+window.abrirModalPix = abrirModalPix;
 
 document.getElementById('btn-fechar-pix')?.addEventListener('click', () => {
     if (pixModal) pixModal.classList.add('hidden');

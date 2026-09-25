@@ -90,32 +90,54 @@ def chat_inteligente():
             )
         texto_solics = "\n".join(lista_solics) if lista_solics else "Nenhuma solicitação aberta no momento."
 
-        # --- CONSTRUÇÃO DO PROMPT RIGOROSO (Anti-Alucinação) ---
+        # --- RAG NÃO ESTRUTURADO: Base de Conhecimento e Regras de Negócio Oficiais ---
+        rag_nao_estruturado = """
+REGULAMENTO E DIRETRIZES DA PLATAFORMA SERVIÇOSAPP:
+1. PERFIS E PERMISSÕES:
+   - Solicitante (Pessoa Física ou Jurídica): utiliza a plataforma para cadastrar demandas, comparar orçamentos concorrentes e contratar serviços. Não é prestador de serviços e não pode emitir propostas para outros usuários.
+   - Prestador de Serviços (Autônomo, MEI ou Empresa): cadastra serviços avulsos no catálogo, consulta solicitações abertas e envia propostas comerciais formais.
+   - Ambos (Dual): possui acesso simultâneo às funcionalidades de contratante e prestador.
+2. SIGILO E PRIVACIDADE DE ORÇAMENTOS:
+   - Os prestadores concorrentes NUNCA têm visibilidade sobre os orçamentos, valores ou propostas dos concorrentes na mesma solicitação. O sigilo comercial é absoluto.
+   - Apenas o solicitante proprietário da demanda tem acesso ao painel comparativo de propostas.
+3. PRIVACIDADE DA CHAVE PIX:
+   - Chaves Pix e dados sensíveis de pagamento NUNCA são expostos em catálogos abertos ou perfis públicos.
+   - O demonstrativo de pagamento Pix e QR Code são liberados exclusivamente após o solicitante aprovar formalmente o orçamento.
+4. FORMAÇÃO DO ORÇAMENTO:
+   - O orçamento comercial discrimina com clareza: Mão de Obra, Insumos/Peças (com quantitativos e valores unitários), Taxa de Deslocamento/Logística, Prazo em dias úteis e Garantia Técnica (mínimo legal de 90 dias conforme CDC).
+5. RANKING DE REPUTAÇÃO ORGÂNICO:
+   - Fórmula: Pontos = (Concluídos × 25) + (Aprovados × 15) + (Nota Média × 20) + (Avaliações × 10).
+"""
+
+        # --- CONSTRUÇÃO DO PROMPT RIGOROSO (Anti-Alucinação com RAG Estruturado + Não-Estruturado) ---
         prompt_sistema = f"""
 Você é o assistente inteligente oficial da plataforma de serviços "ServiçosApp".
-Sua função é auxiliar contratantes e prestadores fornecendo informações estritamente baseadas nos dados reais abaixo.
+Sua função é auxiliar contratantes e prestadores fornecendo informações estritamente baseadas nas bases RAG estruturadas e documentais abaixo.
 
 CONTEXTO DO USUÁRIO QUE PERGUNTOU:
 {contexto_usuario}
 
-BASE DE DADOS DE SERVIÇOS AVULSOS (RAG):
+CONHECIMENTO DOCUMENTAL E REGRAS DE NEGÓCIO (RAG NÃO ESTRUTURADO):
+{rag_nao_estruturado}
+
+BASE DE DADOS DE SERVIÇOS AVULSOS (RAG ESTRUTURADO 1):
 {texto_servicos}
 
-BASE DE DADOS DE PRESTADORES E RANKING (RAG):
+BASE DE DADOS DE PRESTADORES E RANKING (RAG ESTRUTURADO 2):
 {texto_prestadores}
 
-MURAL DE SOLICITAÇÕES ABERTAS (RAG):
+MURAL DE SOLICITAÇÕES ABERTAS (RAG ESTRUTURADO 3):
 {texto_solics}
 
 PERGUNTA DO USUÁRIO:
 {mensagem_usuario}
 
 DIRETRIZES FUNDAMENTAIS (LEIA E SIGA RIGOROSAMENTE):
-1. NUNCA invente serviços, nomes de prestadores, contatos, notas ou valores que não estejam nas bases de dados acima.
-2. Se o usuário perguntar quem é o melhor profissional, quem atende mais serviços ou ranking, cite os prestadores da base com maior pontuação e melhor nota média.
+1. NUNCA invente serviços, nomes de prestadores, contatos, notas, chaves Pix ou valores que não estejam nas bases de dados acima.
+2. Se o usuário perguntar sobre regras (como funciona Pix, sigilo de orçamentos, perfis, ranking ou garantias), responda com base no RAG Não Estruturado.
 3. Se o usuário estiver procurando um serviço que exista na base, informe o título, categoria, valor base e recomende conferir no "Catálogo de Serviços" para contratar.
 4. Se o serviço NÃO existir nas bases de dados, NÃO INVENTE. Responda: "No momento não temos esse serviço cadastrado no catálogo avulso. Você pode clicar em 'Nova Solicitação' para que nossos prestadores cadastrados enviem orçamentos diretamente para você!"
-5. Seja prestativo, claro e use Markdown amigável (tabelas, listas ou negrito onde for útil).
+5. Seja prestativo, claro, ético e use Markdown amigável (tabelas, listas ou negrito onde for útil).
 """
 
         # --- CHAMADA AO GEMINI ---
@@ -135,9 +157,50 @@ DIRETRIZES FUNDAMENTAIS (LEIA E SIGA RIGOROSAMENTE):
             }), 200
         return jsonify({"erro": err_msg}), 500
 
+# --- 5. Rota de Ferramentas MCP (Model Context Protocol) ---
+@app.route('/api/mcp/tools', methods=['GET'])
+def listar_ferramentas_mcp():
+    """Declaração formal do catálogo de ferramentas compatível com o protocolo MCP"""
+    return jsonify({
+        "protocol": "mcp/1.0",
+        "tools": [
+            {
+                "name": "consultar_catalogo_servicos",
+                "description": "Recupera serviços avulsos cadastrados no catálogo com filtros por categoria ou termo de busca.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "categoria": {"type": "string", "description": "Categoria do serviço"},
+                        "busca": {"type": "string", "description": "Termo de busca textual"}
+                    }
+                }
+            },
+            {
+                "name": "consultar_ranking_prestadores",
+                "description": "Recupera os melhores prestadores ordenados por pontuação de reputação e nota média.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "limite": {"type": "integer", "description": "Número máximo de prestadores a retornar"}
+                    }
+                }
+            },
+            {
+                "name": "consultar_solicitacoes_abertas",
+                "description": "Recupera demandas abertas que aguardam propostas de orçamento.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "categoria": {"type": "string", "description": "Categoria da demanda"}
+                    }
+                }
+            }
+        ]
+    }), 200
+
 @app.route('/')
 def home():
-    return "API Flask com Gemini 3.8 Flash, Firebase e CORS funcionando perfeitamente!"
+    return "API Flask com Gemini 3.8 Flash, RAG Estruturado + Não Estruturado e MCP funcionando perfeitamente!"
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

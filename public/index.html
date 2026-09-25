@@ -14,6 +14,59 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
 
+        /* Utilitários de remoção de barra de rolagem dos menus/navegadores */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none !important;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        /* Barra de rolagem suave e discreta para caixas de conteúdo */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animações elegantes para Notificações (Toasts) */
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-16px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes toastSlideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+        }
+        .toast-animate-in {
+            animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .toast-animate-out {
+            animation: toastSlideOut 0.25s ease-in forwards;
+        }
+
         @media print {
             body * {
                 visibility: hidden !important;
@@ -40,6 +93,9 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+    <!-- Container Global de Notificações Toast Modernas -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[999999] flex flex-col gap-3 pointer-events-none max-w-sm w-[calc(100%-2.5rem)] sm:w-96" aria-live="polite"></div>
+
     <!-- Navbar -->
     <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
@@ -706,7 +762,10 @@
                     <button type="button" id="btn-whatsapp-pix" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer">
                         <i class="fab fa-whatsapp mr-2 text-sm"></i> Compartilhar no WhatsApp
                     </button>
-                    <div class="flex gap-2 w-full sm:w-auto justify-end">
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                        <button type="button" id="btn-aceitar-proposta-modal" class="hidden flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer">
+                            <i class="fas fa-check-circle mr-1.5"></i> Aceitar Esta Proposta
+                        </button>
                         <button type="button" id="btn-pdf-pix" class="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer">
                             <i class="fas fa-file-pdf mr-1.5 text-red-400"></i> Imprimir / PDF
                         </button>

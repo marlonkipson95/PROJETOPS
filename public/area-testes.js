@@ -234,8 +234,8 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
         </div>
       </div>
 
-      <!-- Navegação das Abas de Teste -->
-      <div class="border-b border-gray-200 mb-6 overflow-x-auto">
+      <!-- Navegação das Abas de Teste com scrollbar oculta -->
+      <div class="border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar">
         <nav class="-mb-px flex space-x-2 sm:space-x-6 min-w-max" id="demo-tabs-nav">
           <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-indigo-600 text-indigo-700" data-aba="cenarios">
             <i class="fas fa-users-cog text-indigo-500"></i> Simulação de Cenários (3 Perfis)
@@ -770,6 +770,84 @@ function renderizarCenario1Solicitante(container) {
       </div>
     `;
   } else {
+    // Propostas do Mural de Concorrência do Cenário 1
+    const propostasCenario1 = [
+      {
+        id: 'prop_carlos',
+        prestador: 'Carlos Eletricista',
+        iniciais: 'CE',
+        corAvatar: 'bg-blue-100 text-blue-600',
+        nota: 4.9,
+        avaliacoes: 52,
+        destaque: 'MAIS RECOMENDADA',
+        corDestaque: 'bg-indigo-600 text-white',
+        bordaCard: 'border-2 border-indigo-500 shadow-md',
+        escopo: 'Etapa 1: Desenergização segura e remoção da fiação antiga de 2.5mm;\nEtapa 2: Passagem de novos condutores antichama de 4mm e 6mm;\nEtapa 3: Instalação do quadro de distribuição bifásico DIN 12 módulos;\nEtapa 4: Montagem do barramento de cobre bifásico tipo pente e aterramento TT;\nEtapa 5: Teste com multímetro/alicate amperímetro e identificação de circuitos.',
+        itens: [
+          { descricao: 'Cabo Flexível 4.0mm Antichama (Rolo 50m)', quantidade: 1, valorUnitario: 85.00, subtotal: 85.00 },
+          { descricao: 'Cabo Flexível 6.0mm Antichama (Rolo 25m)', quantidade: 1, valorUnitario: 55.00, subtotal: 55.00 },
+          { descricao: 'Disjuntores DIN Curva C (20A / 32A)', quantidade: 4, valorUnitario: 10.00, subtotal: 40.00 }
+        ],
+        maoDeObra: 450.00,
+        material: 180.00,
+        deslocamento: 30.00,
+        total: 660.00,
+        prazo: '2 dias úteis',
+        garantia: '180 dias (Laudo Técnico e ART inclusos)',
+        chavePix: 'carlos.eletro@servicosapp.com.br',
+        status: (demoState.propostaAceitaCenario1 === 'prop_carlos') ? 'APROVADO' : (demoState.propostaAceitaCenario1 ? 'REPROVADO' : 'AGUARDANDO')
+      },
+      {
+        id: 'prop_roberto',
+        prestador: 'Roberto Silva Instalações',
+        iniciais: 'RS',
+        corAvatar: 'bg-emerald-100 text-emerald-600',
+        nota: 5.0,
+        avaliacoes: 64,
+        destaque: 'ATENDIMENTO EMERGENCIAL',
+        corDestaque: 'bg-emerald-600 text-white',
+        bordaCard: 'border border-gray-200 shadow-xs hover:border-emerald-400',
+        escopo: 'Etapa 1: Mapeamento de carga elétrica existente e teste de isolamento;\nEtapa 2: Instalação de quadro DIN de embutir 12 módulos com barramento bifásico;\nEtapa 3: Substituição total da fiação por cabos antichama alta performance;\nEtapa 4: Instalação de dispositivo DPS (proteção contra raios) e DR (proteção contra choques);\nEtapa 5: Entrega técnica com laudo de conformidade NBR 5410.',
+        itens: [
+          { descricao: 'Quadro de Distribuição 12 Módulos Tigre', quantidade: 1, valorUnitario: 45.00, subtotal: 45.00 },
+          { descricao: 'Disjuntores Bipolares DIN Schneider', quantidade: 3, valorUnitario: 25.00, subtotal: 75.00 },
+          { descricao: 'Barramento Pente Bifásico de Cobre 12M', quantidade: 1, valorUnitario: 40.00, subtotal: 40.00 }
+        ],
+        maoDeObra: 520.00,
+        material: 160.00,
+        deslocamento: 0.00,
+        total: 680.00,
+        prazo: '1 dia (Emergencial Prioritário)',
+        garantia: '365 dias (1 ano completo com suporte)',
+        chavePix: '11987654321',
+        status: (demoState.propostaAceitaCenario1 === 'prop_roberto') ? 'APROVADO' : (demoState.propostaAceitaCenario1 ? 'REPROVADO' : 'AGUARDANDO')
+      },
+      {
+        id: 'prop_luz',
+        prestador: 'Luz & Força MEI',
+        iniciais: 'LF',
+        corAvatar: 'bg-amber-100 text-amber-600',
+        nota: 4.7,
+        avaliacoes: 38,
+        destaque: 'PROPOSTA ECONÔMICA',
+        corDestaque: 'bg-amber-600 text-white',
+        bordaCard: 'border border-gray-200 shadow-xs hover:border-amber-400',
+        escopo: 'Etapa 1: Inspeção preliminar e desativação da rede;\nEtapa 2: Passagem de novos condutores nos eletrodutos;\nEtapa 3: Instalação do quadro e ligação de 6 disjuntores monofásicos;\nEtapa 4: Teste de continuidade e balanceamento das fases.',
+        itens: [
+          { descricao: 'Cabos 4mm e 6mm Cobre Puro', quantidade: 2, valorUnitario: 75.00, subtotal: 150.00 },
+          { descricao: 'Disjuntores Unipolares Tramontina', quantidade: 6, valorUnitario: 10.00, subtotal: 60.00 }
+        ],
+        maoDeObra: 400.00,
+        material: 210.00,
+        deslocamento: 40.00,
+        total: 650.00,
+        prazo: '3 dias úteis',
+        garantia: '90 dias (conforme CDC)',
+        chavePix: 'luzeforca@mei.com.br',
+        status: (demoState.propostaAceitaCenario1 === 'prop_luz') ? 'APROVADO' : (demoState.propostaAceitaCenario1 ? 'REPROVADO' : 'AGUARDANDO')
+      }
+    ];
+
     // Mural Comparativo de Concorrência
     conteudoSubAba = `
       <div class="space-y-5 animate-fadeIn">
@@ -784,109 +862,93 @@ function renderizarCenario1Solicitante(container) {
           </p>
         </div>
 
-        <div class="flex justify-between items-center">
-          <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">
-            Comparativo de Propostas Concorrentes Recebidas (3 Orçamentos)
-          </h4>
-          <span class="text-xs text-gray-500">Avalie reputação vs preço vs insumos</span>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">
+              Comparativo de Propostas Concorrentes Recebidas (3 Orçamentos)
+            </h4>
+            <p class="text-xs text-gray-500">Clique em "Ver Especificação Completa" para inspecionar peças, escopo e fatura antes de contratar.</p>
+          </div>
+          <span class="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full font-bold">
+            Sigilo Concorrencial Ativo
+          </span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Proposta A -->
-          <div class="bg-white border-2 border-indigo-500 rounded-2xl p-5 shadow-md flex flex-col justify-between relative">
-            <span class="absolute -top-3 right-4 bg-indigo-600 text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-xs">
-              Mais Recomendada
-            </span>
-            <div>
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">CE</div>
-                <div>
-                  <h5 class="text-sm font-bold text-gray-900">Carlos Eletricista</h5>
-                  <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
-                    <i class="fas fa-star text-[10px]"></i> 4.9 <span class="text-gray-400 font-normal">(52 avaliações)</span>
-                  </div>
-                </div>
-              </div>
-              <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
-                <div class="flex justify-between"><span>Mão de Obra:</span><span class="font-bold text-gray-800">R$ 450,00</span></div>
-                <div class="flex justify-between"><span>Materiais (Cabos/Disjuntores):</span><span class="font-bold text-gray-800">R$ 180,00</span></div>
-                <div class="flex justify-between"><span>Deslocamento:</span><span class="font-bold text-gray-800">R$ 30,00</span></div>
-                <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500"><span>Prazo:</span><span class="font-semibold text-gray-700">2 dias úteis</span></div>
-                <div class="flex justify-between text-gray-500"><span>Garantia:</span><span class="font-semibold text-emerald-700">180 dias</span></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between items-baseline mb-3">
-                <span class="text-xs text-gray-500 font-bold">TOTAL:</span>
-                <span class="text-2xl font-black text-gray-900">R$ 660,00</span>
-              </div>
-              <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prestador="Carlos Eletricista" data-valor="R$ 660,00">
-                <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
-              </button>
-            </div>
-          </div>
+          ${propostasCenario1.map(p => {
+            const isAprovado = p.status === 'APROVADO';
+            return `
+              <div class="bg-white ${p.bordaCard} rounded-2xl p-5 flex flex-col justify-between relative transition-all">
+                ${p.destaque ? `
+                  <span class="absolute -top-3 right-4 ${p.corDestaque} text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-xs">
+                    ${p.destaque}
+                  </span>
+                ` : ''}
 
-          <!-- Proposta B -->
-          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
-            <div>
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">RS</div>
                 <div>
-                  <h5 class="text-sm font-bold text-gray-900">Roberto Silva Instalações</h5>
-                  <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
-                    <i class="fas fa-star text-[10px]"></i> 5.0 <span class="text-gray-400 font-normal">(64 avaliações)</span>
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-full ${p.corAvatar} flex items-center justify-center font-bold text-sm">
+                      ${p.iniciais}
+                    </div>
+                    <div>
+                      <h5 class="text-sm font-bold text-gray-900">${p.prestador}</h5>
+                      <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
+                        <i class="fas fa-star text-[10px]"></i> ${p.nota.toFixed(1)} <span class="text-gray-400 font-normal">(${p.avaliacoes} avaliações)</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
-                <div class="flex justify-between"><span>Mão de Obra:</span><span class="font-bold text-gray-800">R$ 520,00</span></div>
-                <div class="flex justify-between"><span>Materiais (Disjuntores DIN):</span><span class="font-bold text-gray-800">R$ 160,00</span></div>
-                <div class="flex justify-between"><span>Deslocamento:</span><span class="font-bold text-emerald-600 font-semibold">Grátis</span></div>
-                <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500"><span>Prazo:</span><span class="font-semibold text-gray-700">1 dia (Emergencial)</span></div>
-                <div class="flex justify-between text-gray-500"><span>Garantia:</span><span class="font-semibold text-emerald-700">365 dias (1 ano)</span></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between items-baseline mb-3">
-                <span class="text-xs text-gray-500 font-bold">TOTAL:</span>
-                <span class="text-2xl font-black text-gray-900">R$ 680,00</span>
-              </div>
-              <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prestador="Roberto Silva" data-valor="R$ 680,00">
-                <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
-              </button>
-            </div>
-          </div>
 
-          <!-- Proposta C -->
-          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
-            <div>
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm">LF</div>
-                <div>
-                  <h5 class="text-sm font-bold text-gray-900">Luz & Força MEI</h5>
-                  <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
-                    <i class="fas fa-star text-[10px]"></i> 4.7 <span class="text-gray-400 font-normal">(38 avaliações)</span>
+                  <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">Mão de Obra:</span>
+                      <span class="font-bold text-gray-800">R$ ${p.maoDeObra.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">Materiais & Peças:</span>
+                      <span class="font-bold text-gray-800">R$ ${p.material.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-500">Deslocamento:</span>
+                      <span class="font-bold ${p.deslocamento === 0 ? 'text-emerald-600' : 'text-gray-800'}">
+                        ${p.deslocamento === 0 ? 'Grátis' : `R$ ${p.deslocamento.toFixed(2).replace('.', ',')}`}
+                      </span>
+                    </div>
+                    <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500">
+                      <span>Prazo:</span>
+                      <span class="font-semibold text-gray-700">${p.prazo}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                      <span>Garantia:</span>
+                      <span class="font-semibold text-emerald-700">${p.garantia}</span>
+                    </div>
                   </div>
                 </div>
+
+                <div>
+                  <div class="flex justify-between items-baseline mb-3">
+                    <span class="text-xs text-gray-500 font-bold uppercase tracking-wider">TOTAL:</span>
+                    <span class="text-2xl font-black text-gray-900">R$ ${p.total.toFixed(2).replace('.', ',')}</span>
+                  </div>
+
+                  <!-- Botão 1: Especificação Completa & Fatura -->
+                  <button type="button" class="btn-ver-especificacao-proposta w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all mb-2 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs" data-prop-id="${p.id}">
+                    <i class="fas fa-file-invoice text-indigo-600"></i> Ver Especificação & Fatura
+                  </button>
+
+                  <!-- Botão 2: Aceite da Proposta ou Fatura Pix Liberada -->
+                  ${isAprovado ? `
+                    <button type="button" class="btn-ver-fatura-pix-aprovada w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prop-id="${p.id}">
+                      <i class="fab fa-pix"></i> Proposta Aceita • Ver Pix / PDF
+                    </button>
+                  ` : `
+                    <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 ${p.destaque === 'MAIS RECOMENDADA' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-900 hover:bg-gray-800'} text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prop-id="${p.id}" data-prestador="${p.prestador}" data-valor="R$ ${p.total.toFixed(2).replace('.', ',')}">
+                      <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
+                    </button>
+                  `}
+                </div>
               </div>
-              <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
-                <div class="flex justify-between"><span>Mão de Obra:</span><span class="font-bold text-gray-800">R$ 400,00</span></div>
-                <div class="flex justify-between"><span>Materiais:</span><span class="font-bold text-gray-800">R$ 210,00</span></div>
-                <div class="flex justify-between"><span>Deslocamento:</span><span class="font-bold text-gray-800">R$ 40,00</span></div>
-                <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500"><span>Prazo:</span><span class="font-semibold text-gray-700">3 dias úteis</span></div>
-                <div class="flex justify-between text-gray-500"><span>Garantia:</span><span class="font-semibold text-emerald-700">90 dias</span></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between items-baseline mb-3">
-                <span class="text-xs text-gray-500 font-bold">TOTAL:</span>
-                <span class="text-2xl font-black text-gray-900">R$ 650,00</span>
-              </div>
-              <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prestador="Luz & Força MEI" data-valor="R$ 650,00">
-                <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
-              </button>
-            </div>
-          </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -915,8 +977,8 @@ function renderizarCenario1Solicitante(container) {
           </div>
         </div>
 
-        <!-- Seletor de Sub-Abas do Cenário 1 -->
-        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+        <!-- Seletor de Sub-Abas do Cenário 1 com scrollbar oculta -->
+        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
           <button type="button" class="btn-subaba-c1 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'solicitacoes' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="solicitacoes">
             Minhas Demandas
           </button>
@@ -950,20 +1012,114 @@ function renderizarCenario1Solicitante(container) {
     });
   });
 
-  // Bind simular contratação direta
+  // Bind simular contratação direta com Toast
   container.querySelectorAll('.btn-simular-contratacao-direta').forEach(b => {
     b.addEventListener('click', () => {
       const titulo = b.getAttribute('data-titulo');
-      alert(`Simulação de Contratação Direta: "${titulo}" contratado com sucesso! A solicitação foi criada para o prestador.`);
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao('sucesso', 'Serviço Contratado!', `A contratação direta de "${titulo}" foi registrada com sucesso! Acompanhe em "Minhas Demandas".`);
+      }
     });
   });
 
-  // Bind simular aceite de proposta
+  // Função interna para aceitar proposta e liberar fatura Pix
+  const aceitarPropostaDemo = (propId) => {
+    demoState.propostaAceitaCenario1 = propId;
+    const p = propostasCenario1.find(item => item.id === propId);
+    if (!p) return;
+
+    if (typeof window.mostrarNotificacao === 'function') {
+      window.mostrarNotificacao(
+        'sucesso',
+        'Proposta Comercial Aprovada!',
+        `Parabéns! A proposta de ${p.prestador} no valor de R$ ${p.total.toFixed(2).replace('.', ',')} foi aceita. O demonstrativo Pix e fatura foram liberados!`
+      );
+    }
+
+    if (typeof window.abrirModalPix === 'function') {
+      window.abrirModalPix(
+        `Contratação Aprovada: ${p.prestador}`,
+        `R$ ${p.total.toFixed(2).replace('.', ',')}`,
+        p.chavePix,
+        p.prestador,
+        {
+          escopo: p.escopo,
+          itens: p.itens,
+          maoDeObra: p.maoDeObra,
+          material: p.material,
+          deslocamento: p.deslocamento,
+          prazo: p.prazo,
+          garantia: p.garantia,
+          somenteEspecificacao: false
+        }
+      );
+    }
+
+    renderizarCenario1Solicitante(container);
+  };
+
+  // Bind botão "Ver Especificação Completa & Fatura"
+  container.querySelectorAll('.btn-ver-especificacao-proposta').forEach(b => {
+    b.addEventListener('click', () => {
+      const propId = b.getAttribute('data-prop-id');
+      const p = propostasCenario1.find(item => item.id === propId);
+      if (!p) return;
+
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          `Especificação Técnica & Orçamento: ${p.prestador}`,
+          `R$ ${p.total.toFixed(2).replace('.', ',')}`,
+          p.chavePix,
+          p.prestador,
+          {
+            escopo: p.escopo,
+            itens: p.itens,
+            maoDeObra: p.maoDeObra,
+            material: p.material,
+            deslocamento: p.deslocamento,
+            prazo: p.prazo,
+            garantia: p.garantia,
+            somenteEspecificacao: p.status !== 'APROVADO',
+            onAceitar: () => aceitarPropostaDemo(p.id)
+          }
+        );
+      }
+    });
+  });
+
+  // Bind botão "Aceitar Esta Proposta"
   container.querySelectorAll('.btn-simular-aceite-proposta').forEach(b => {
     b.addEventListener('click', () => {
-      const prest = b.getAttribute('data-prestador');
-      const val = b.getAttribute('data-valor');
-      alert(`Parabéns! Proposta de ${prest} no valor de ${val} aceita com sucesso! O demonstrativo de pagamento Pix e a fatura formal foram liberados.`);
+      const propId = b.getAttribute('data-prop-id');
+      aceitarPropostaDemo(propId);
+    });
+  });
+
+  // Bind botão "Proposta Aceita • Ver Pix / PDF"
+  container.querySelectorAll('.btn-ver-fatura-pix-aprovada').forEach(b => {
+    b.addEventListener('click', () => {
+      const propId = b.getAttribute('data-prop-id');
+      const p = propostasCenario1.find(item => item.id === propId);
+      if (!p) return;
+
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          `Fatura Comercial & Pagamento Pix: ${p.prestador}`,
+          `R$ ${p.total.toFixed(2).replace('.', ',')}`,
+          p.chavePix,
+          p.prestador,
+          {
+            escopo: p.escopo,
+            itens: p.itens,
+            maoDeObra: p.maoDeObra,
+            material: p.material,
+            deslocamento: p.deslocamento,
+            prazo: p.prazo,
+            garantia: p.garantia,
+            somenteEspecificacao: false
+          }
+        );
+      }
     });
   });
 }
@@ -1161,6 +1317,131 @@ function renderizarCenario2Prestador(container) {
         </div>
       </div>
     `;
+  } else if (subAba === 'oportunidades') {
+    // Módulo de Oportunidades Abertas (Demandas para o Prestador Formular Proposta)
+    conteudoSubAba = `
+      <div class="space-y-4 animate-fadeIn">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
+          <div>
+            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Mural de Oportunidades (Demandas em Aberto)</h4>
+            <p class="text-xs text-gray-500">Demandas reais publicadas por solicitantes. Formule orçamentos estruturados com sigilo concorrencial garantido.</p>
+          </div>
+          <span class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-lg font-bold flex items-center gap-1.5">
+            <i class="fas fa-lock text-[10px]"></i> Sigilo Concorrencial Ativo
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+          <!-- Oportunidade 1 -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs hover:border-indigo-300 transition-all">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
+              <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Elétrica Residencial</span>
+                  <span class="text-xs text-gray-400"><i class="fas fa-map-marker-alt mr-1"></i> São Paulo, SP (Jardins)</span>
+                </div>
+                <h5 class="text-base font-bold text-gray-900">Troca Completa de Fiação e Instalação de Quadro DIN Bifásico</h5>
+                <p class="text-xs text-gray-600 mt-1">Imóvel residencial antigo necessitando substituição de cabos 2.5mm para 4mm/6mm, disjuntores DIN e aterramento TT.</p>
+              </div>
+              <div class="shrink-0">
+                <button type="button" class="btn-abrir-form-orcamento px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-2" data-demanda-id="demanda_eletrica" data-demanda-titulo="Troca Completa de Fiação e Quadro DIN">
+                  <i class="fas fa-calculator"></i> Formular Proposta
+                </button>
+              </div>
+            </div>
+            <div class="border-t border-gray-100 pt-3 flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2">
+              <span>Publicado por: <b>Juliana Mendes da Silva (Solicitante)</b></span>
+              <span class="text-indigo-600 font-semibold"><i class="fas fa-shield-alt mr-1"></i> Propostas concorrentes são ocultadas entre prestadores</span>
+            </div>
+          </div>
+
+          <!-- Oportunidade 2 -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs hover:border-indigo-300 transition-all">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
+              <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full uppercase">Climatização & Refrigeração</span>
+                  <span class="text-xs text-gray-400"><i class="fas fa-map-marker-alt mr-1"></i> Santana, São Paulo - SP</span>
+                </div>
+                <h5 class="text-base font-bold text-gray-900">Higienização e Carga de Gás em 2 Aparelhos Split 12.000 BTUs</h5>
+                <p class="text-xs text-gray-600 mt-1">Limpeza profunda de serpentinas e turbinas com bactericida e reposição de gás R410A.</p>
+              </div>
+              <div class="shrink-0">
+                <button type="button" class="btn-abrir-form-orcamento px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-2" data-demanda-id="demanda_ar" data-demanda-titulo="Higienização e Carga de Gás Split">
+                  <i class="fas fa-calculator"></i> Formular Proposta
+                </button>
+              </div>
+            </div>
+            <div class="border-t border-gray-100 pt-3 flex flex-wrap justify-between items-center text-xs text-gray-500 gap-2">
+              <span>Publicado por: <b>Clínica Odontológica Dra. Camila (PJ Solicitante)</b></span>
+              <span class="text-indigo-600 font-semibold"><i class="fas fa-shield-alt mr-1"></i> Emissão de Fatura / Nota Fiscal solicitada</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel / Modal Interativo de Formulação de Orçamento -->
+        <div id="painel-formular-orcamento" class="hidden bg-gray-50 border-2 border-indigo-200 rounded-2xl p-5 sm:p-6 shadow-sm mt-4">
+          <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+            <div>
+              <span class="text-[10px] uppercase font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md">Formulação de Proposta Formal</span>
+              <h4 id="form-orcamento-titulo-demanda" class="text-base font-bold text-gray-900 mt-1">Elaborar Orçamento Comercial</h4>
+            </div>
+            <button type="button" id="btn-fechar-form-orcamento" class="text-gray-400 hover:text-gray-600 text-lg cursor-pointer">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Mão de Obra (R$)</label>
+                <input type="number" id="input-orc-mao-obra" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-indigo-500" value="480.00" step="10">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Materiais / Peças (R$)</label>
+                <input type="number" id="input-orc-materiais" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-indigo-500" value="150.00" step="10">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Taxa Deslocamento (R$)</label>
+                <input type="number" id="input-orc-deslocamento" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-indigo-500" value="30.00" step="5">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Prazo de Execução (Dias)</label>
+                <input type="number" id="input-orc-prazo" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-indigo-500" value="2" min="1">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Garantia Técnica Oferecida</label>
+                <select id="input-orc-garantia" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-indigo-500">
+                  <option value="90 dias">90 dias (Garantia Legal CDC)</option>
+                  <option value="180 dias" selected>180 dias (6 meses de cobertura)</option>
+                  <option value="365 dias (1 ano)">365 dias (1 ano de cobertura)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Escopo discriminado das etapas técnicas:</label>
+              <textarea id="input-orc-escopo" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-indigo-500">Etapa 1: Inspeção e isolamento preventivo;
+Etapa 2: Substituição da fiação conforme norma NBR 5410;
+Etapa 3: Instalação de barramento bifásico e teste de carga em todos os circuitos.</textarea>
+            </div>
+
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 flex justify-between items-center">
+              <div>
+                <span class="text-[10px] text-indigo-700 uppercase font-bold block">Valor Total Calculado</span>
+                <span id="label-orc-total-calculado" class="text-xl font-black text-indigo-900">R$ 660,00</span>
+              </div>
+              <button type="button" id="btn-enviar-proposta-formal" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-2">
+                <i class="fas fa-paper-plane"></i> Enviar Proposta ao Solicitante
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   } else {
     // Módulo de Orçamentos Pré-formatados (Templates)
     conteudoSubAba = `
@@ -1259,13 +1540,16 @@ function renderizarCenario2Prestador(container) {
           </div>
         </div>
 
-        <!-- Seletor de Sub-Abas do Cenário 2 -->
-        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+        <!-- Seletor de Sub-Abas do Cenário 2 com scrollbar oculta -->
+        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
           <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'perfil' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="perfil">
             Perfil & Agenda
           </button>
           <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'propostas' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="propostas">
             Histórico Propostas
+          </button>
+          <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'oportunidades' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="oportunidades">
+            Oportunidades de Orçar
           </button>
           <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'templates' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="templates">
             Templates Salvos
@@ -1302,19 +1586,122 @@ function renderizarCenario2Prestador(container) {
     });
   });
 
-  // Bind abrir fatura prestador
+  // Bind abrir fatura prestador via Modal Pix elegante
   container.querySelectorAll('.btn-abrir-fatura-prestador').forEach(b => {
     b.addEventListener('click', () => {
       const tit = b.getAttribute('data-titulo');
       const val = b.getAttribute('data-valor');
-      alert(`Demonstrativo Comercial & Fatura Pix de "${tit}" (${val}) gerado! Pronto para impressão e envio ao cliente.`);
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          `Demonstrativo & Fatura Pix: ${tit}`,
+          val,
+          '11987654321',
+          'Marcos Vinicius Santos (M.V. Climatização)',
+          {
+            escopo: '1. Desmontagem e isolamento;\n2. Execução técnica especializada;\n3. Teste de conformidade e emissão de garantia.',
+            itens: [
+              { descricao: 'Mão de Obra Certificada NBR', preco: 380.00 },
+              { descricao: 'Insumos de Fixação e Conexão', preco: 140.00 }
+            ],
+            maoDeObra: 380.00,
+            material: 140.00,
+            deslocamento: 0.00,
+            prazo: '1 dia útil',
+            garantia: '180 dias',
+            somenteEspecificacao: false
+          }
+        );
+      }
     });
   });
+
+  // Bind abrir form de formulacao de orcamento na sub-aba oportunidades
+  const painelForm = container.querySelector('#painel-formular-orcamento');
+  if (painelForm) {
+    container.querySelectorAll('.btn-abrir-form-orcamento').forEach(b => {
+      b.addEventListener('click', () => {
+        const demTitulo = b.getAttribute('data-demanda-titulo');
+        const titElem = container.querySelector('#form-orcamento-titulo-demanda');
+        if (titElem) titElem.textContent = `Proposta para: ${demTitulo}`;
+        painelForm.classList.remove('hidden');
+        painelForm.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    const btnFechar = container.querySelector('#btn-fechar-form-orcamento');
+    if (btnFechar) {
+      btnFechar.addEventListener('click', () => {
+        painelForm.classList.add('hidden');
+      });
+    }
+
+    // Recalcular total dinâmico no form
+    const inputMao = container.querySelector('#input-orc-mao-obra');
+    const inputMat = container.querySelector('#input-orc-materiais');
+    const inputDes = container.querySelector('#input-orc-deslocamento');
+    const lblTotal = container.querySelector('#label-orc-total-calculado');
+
+    const recalcularTotal = () => {
+      const m = parseFloat(inputMao?.value || 0);
+      const mat = parseFloat(inputMat?.value || 0);
+      const d = parseFloat(inputDes?.value || 0);
+      const total = m + mat + d;
+      if (lblTotal) lblTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    };
+
+    [inputMao, inputMat, inputDes].forEach(inp => inp?.addEventListener('input', recalcularTotal));
+
+    // Enviar Proposta
+    const btnEnviar = container.querySelector('#btn-enviar-proposta-formal');
+    if (btnEnviar) {
+      btnEnviar.addEventListener('click', () => {
+        const m = parseFloat(inputMao?.value || 0);
+        const mat = parseFloat(inputMat?.value || 0);
+        const d = parseFloat(inputDes?.value || 0);
+        const total = m + mat + d;
+        const prazo = container.querySelector('#input-orc-prazo')?.value || '2';
+        const garantia = container.querySelector('#input-orc-garantia')?.value || '180 dias';
+        const escopo = container.querySelector('#input-orc-escopo')?.value || 'Serviço técnico especializado';
+
+        // Inserir no histórico de propostas da demonstração
+        propostasEnviadas.unshift({
+          id: `prop_nova_${Date.now()}`,
+          solicitacaoTitulo: 'Troca Completa de Fiação e Quadro DIN',
+          cliente: 'Juliana Mendes da Silva',
+          escopo: escopo,
+          maoDeObra: m,
+          material: mat,
+          outrosCustos: d,
+          total: total,
+          prazo: parseInt(prazo),
+          garantia: garantia,
+          status: 'AGUARDANDO'
+        });
+
+        if (typeof window.mostrarNotificacao === 'function') {
+          window.mostrarNotificacao(
+            'sucesso',
+            'Proposta Comercial Enviada!',
+            `Seu orçamento de R$ ${total.toFixed(2).replace('.', ',')} foi transmitido ao solicitante com sigilo concorrencial ativo. Acompanhe a decisão em "Histórico Propostas".`
+          );
+        }
+
+        demoState.subAbaCenario2 = 'propostas';
+        renderizarCenario2Prestador(container);
+      });
+    }
+  }
 
   // Bind copiar template
   container.querySelectorAll('.btn-copiar-template').forEach(b => {
     b.addEventListener('click', () => {
-      alert("Modelo carregado com sucesso! Os campos de escopo, etapas, peças e mão de obra foram pré-preenchidos.");
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao(
+          'sucesso',
+          'Modelo Carregado!',
+          'Os parâmetros deste template (escopo técnico, etapas, mão de obra e insumos padrão) foram importados com sucesso.'
+        );
+      }
     });
   });
 }
@@ -1366,7 +1753,7 @@ function renderizarCenario3Misto(container) {
                 <h4 class="text-sm font-bold text-emerald-900">Ambiente do Contratante Ativo</h4>
                 <p class="text-xs text-emerald-700">Você está navegando como cliente: gerenciando reformas e contratando profissionais.</p>
               </div>
-              <button type="button" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-xs" onclick="alert('Simulação: Abrindo formulário de nova solicitação de reforma!')">
+              <button type="button" id="btn-c3-nova-solicitacao" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-xs cursor-pointer">
                 + Nova Solicitação
               </button>
             </div>
@@ -1378,7 +1765,7 @@ function renderizarCenario3Misto(container) {
                 <p class="text-xs text-gray-500 mb-3">Contratado com: M.V. Climatização & Pintura (R$ 1.250,00)</p>
                 <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
                   <span class="text-gray-500">Status: Execução</span>
-                  <button type="button" class="text-emerald-600 font-bold hover:underline" onclick="alert('Abrindo comprovante de pagamento Pix da contratação!')">Ver Fatura Pix</button>
+                  <button type="button" id="btn-c3-fatura-reforma" class="text-emerald-600 font-bold hover:underline cursor-pointer">Ver Fatura Pix</button>
                 </div>
               </div>
               <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
@@ -1387,7 +1774,7 @@ function renderizarCenario3Misto(container) {
                 <p class="text-xs text-gray-500 mb-3">Recebeu 2 propostas de pedreiros locais.</p>
                 <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
                   <span class="text-gray-500">2 Propostas</span>
-                  <button type="button" class="text-indigo-600 font-bold hover:underline" onclick="alert('Comparando propostas de porcelanato!')">Comparar Propostas</button>
+                  <button type="button" id="btn-c3-comparar-bancadas" class="text-indigo-600 font-bold hover:underline cursor-pointer">Comparar Propostas</button>
                 </div>
               </div>
             </div>
@@ -1411,7 +1798,7 @@ function renderizarCenario3Misto(container) {
                 <p class="text-xs text-gray-500 mb-3">Cliente: Roberto Camargo &bull; R$ 850,00</p>
                 <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
                   <span class="text-gray-500">Prazo: 5 dias</span>
-                  <button type="button" class="text-emerald-700 font-bold hover:underline" onclick="alert('Gerando cobrança Pix da consultoria!')">Cobrança Pix</button>
+                  <button type="button" id="btn-c3-fatura-consultoria" class="text-emerald-700 font-bold hover:underline cursor-pointer">Cobrança Pix</button>
                 </div>
               </div>
               <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
@@ -1420,7 +1807,7 @@ function renderizarCenario3Misto(container) {
                 <p class="text-xs text-gray-500 mb-3">Solicitante aguarda propostas de consultoria.</p>
                 <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
                   <span class="text-gray-500">São Paulo, SP</span>
-                  <button type="button" class="text-indigo-600 font-bold hover:underline" onclick="alert('Simulação: Abrindo envio de orçamento formal de consultoria!')">Enviar Proposta</button>
+                  <button type="button" id="btn-c3-enviar-consultoria" class="text-indigo-600 font-bold hover:underline cursor-pointer">Enviar Proposta</button>
                 </div>
               </div>
             </div>
@@ -1437,6 +1824,89 @@ function renderizarCenario3Misto(container) {
       renderizarCenario3Misto(container);
     });
   });
+
+  // Bind ações do Contratante sem alert()
+  const btnNovaSol = container.querySelector('#btn-c3-nova-solicitacao');
+  if (btnNovaSol) {
+    btnNovaSol.addEventListener('click', () => {
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao('info', 'Nova Solicitação', 'Formulário aberto: descreva o escopo da sua reforma para receber orçamentos concorrentes.');
+      }
+    });
+  }
+
+  const btnFatReforma = container.querySelector('#btn-c3-fatura-reforma');
+  if (btnFatReforma) {
+    btnFatReforma.addEventListener('click', () => {
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          'Fatura: Reforma e Pintura de Sala Comercial',
+          'R$ 1.250,00',
+          '11987654321',
+          'M.V. Climatização & Pintura',
+          {
+            escopo: '1. Lixamento e preparação de superfícies;\n2. Aplicação de selador e massa corrida;\n3. Duas demãos de tinta acrílica acetinada.',
+            itens: [
+              { descricao: 'Mão de Obra de Pintura Especializada', preco: 950.00 },
+              { descricao: 'Material (Massa, Fitas e Lixas)', preco: 300.00 }
+            ],
+            maoDeObra: 950.00,
+            material: 300.00,
+            deslocamento: 0.00,
+            prazo: '3 dias úteis',
+            garantia: '180 dias',
+            somenteEspecificacao: false
+          }
+        );
+      }
+    });
+  }
+
+  const btnCompBancadas = container.querySelector('#btn-c3-comparar-bancadas');
+  if (btnCompBancadas) {
+    btnCompBancadas.addEventListener('click', () => {
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao('info', 'Comparador de Propostas', 'Carregando 2 propostas recebidas de profissionais com sigilo concorrencial.');
+      }
+    });
+  }
+
+  // Bind ações da Prestadora sem alert()
+  const btnFatCons = container.querySelector('#btn-c3-fatura-consultoria');
+  if (btnFatCons) {
+    btnFatCons.addEventListener('click', () => {
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          'Cobrança Comercial: Consultoria de Layout & Iluminação',
+          'R$ 850,00',
+          '11976543210',
+          'Ana Carolina Ferraz (Arquiteta & Consultora)',
+          {
+            escopo: '1. Levantamento métrico e luminotécnico in loco;\n2. Elaboração de planta de paginação e luminárias 3D;\n3. Memorial de compras e catálogo de especificações.',
+            itens: [
+              { descricao: 'Honorários Técnicos de Projeto & Layout', preco: 750.00 },
+              { descricao: 'Visita Técnica e Caderno de Especificações', preco: 100.00 }
+            ],
+            maoDeObra: 750.00,
+            material: 100.00,
+            deslocamento: 0.00,
+            prazo: '5 dias úteis',
+            garantia: 'Revisão técnica de 30 dias',
+            somenteEspecificacao: false
+          }
+        );
+      }
+    });
+  }
+
+  const btnEnvCons = container.querySelector('#btn-c3-enviar-consultoria');
+  if (btnEnvCons) {
+    btnEnvCons.addEventListener('click', () => {
+      if (typeof window.mostrarNotificacao === 'function') {
+        window.mostrarNotificacao('sucesso', 'Formulação de Proposta', 'Estruturação de orçamento técnico aberta para envio ao solicitante.');
+      }
+    });
+  }
 }
 
 
@@ -1891,6 +2361,12 @@ function abrirModalInspecaoSolicitacao(solicitacaoId) {
               "${o.observacao}"
             </p>
           ` : ''}
+
+          <div class="mt-3 pt-2 border-t border-gray-100 flex justify-end">
+            <button type="button" class="btn-ver-espec-modal-inspecao px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 transition-colors cursor-pointer flex items-center gap-1.5" data-orc-id="${o.id}">
+              <i class="fas fa-file-invoice"></i> Ver Especificação Completa & Fatura
+            </button>
+          </div>
         </div>
       `;
     });
@@ -1917,6 +2393,37 @@ function abrirModalInspecaoSolicitacao(solicitacaoId) {
       </div>
     </div>
   `;
+
+  // Bind para abrir fatura detalhada dentro do modal de inspeção
+  corpo.querySelectorAll('.btn-ver-espec-modal-inspecao').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const orcId = btn.getAttribute('data-orc-id');
+      const orc = demoState.orcamentos.find(item => item.id === orcId);
+      if (!orc) return;
+
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          `Especificação: ${orc.nomePrestador}`,
+          `R$ ${orc.total.toFixed(2).replace('.', ',')}`,
+          '11987654321',
+          orc.nomePrestador,
+          {
+            escopo: orc.observacao || 'Execução técnica completa conforme diretrizes e memorial descritivo da solicitação.',
+            itens: [
+              { descricao: 'Mão de Obra Especializada', preco: orc.maoDeObra },
+              { descricao: 'Materiais e Componentes', preco: orc.material }
+            ],
+            maoDeObra: orc.maoDeObra,
+            material: orc.material,
+            deslocamento: 0,
+            prazo: `${orc.prazo} dias úteis`,
+            garantia: '180 dias',
+            somenteEspecificacao: orc.status !== 'APROVADO'
+          }
+        );
+      }
+    });
+  });
 
   modal.classList.remove("hidden");
 }
@@ -2012,14 +2519,14 @@ function renderizarOrcamentos(container) {
       <div class="flex justify-between items-center mb-6">
         <div>
           <h3 class="font-bold text-gray-900 text-lg">Visão Geral dos Orçamentos Concorrentes</h3>
-          <p class="text-xs text-gray-500">Detalhamento dos componentes de custo (Mão de Obra + Material + Outros = Total) e status da proposta.</p>
+          <p class="text-xs text-gray-500">Detalhamento dos componentes de custo (Mão de Obra + Material + Deslocamento) e inspeção de faturas.</p>
         </div>
         <span class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200">
           ${orcamentos.length} Propostas
         </span>
       </div>
 
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto no-scrollbar">
         <table class="w-full text-left text-xs">
           <thead class="bg-gray-50 text-gray-600 font-semibold border-b border-gray-200">
             <tr>
@@ -2030,6 +2537,7 @@ function renderizarOrcamentos(container) {
               <th class="p-3 text-right">Valor Total</th>
               <th class="p-3 text-center">Prazo</th>
               <th class="p-3 text-center">Status</th>
+              <th class="p-3 text-center">Especificação</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -2056,6 +2564,11 @@ function renderizarOrcamentos(container) {
             ${o.status}
           </span>
         </td>
+        <td class="p-3 text-center">
+          <button type="button" class="btn-ver-especificacao-tabela px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold rounded-lg border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center gap-1 mx-auto shadow-2xs" data-orc-id="${o.id}">
+            <i class="fas fa-file-invoice"></i> Ver Fatura
+          </button>
+        </td>
       </tr>
     `;
   });
@@ -2067,6 +2580,37 @@ function renderizarOrcamentos(container) {
     </div>
   `;
   container.innerHTML = html;
+
+  // Bind botões "Ver Fatura" da tabela
+  container.querySelectorAll('.btn-ver-especificacao-tabela').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const orcId = btn.getAttribute('data-orc-id');
+      const orc = demoState.orcamentos.find(item => item.id === orcId);
+      if (!orc) return;
+
+      if (typeof window.abrirModalPix === 'function') {
+        window.abrirModalPix(
+          `Orçamento Formal: ${orc.nomePrestador}`,
+          `R$ ${orc.total.toFixed(2).replace('.', ',')}`,
+          '11987654321',
+          orc.nomePrestador,
+          {
+            escopo: orc.observacao || 'Execução técnica completa conforme diretrizes e memorial descritivo da solicitação.',
+            itens: [
+              { descricao: 'Mão de Obra Especializada', preco: orc.maoDeObra },
+              { descricao: 'Materiais e Componentes', preco: orc.material }
+            ],
+            maoDeObra: orc.maoDeObra,
+            material: orc.material,
+            deslocamento: 0,
+            prazo: `${orc.prazo} dias úteis`,
+            garantia: '180 dias',
+            somenteEspecificacao: orc.status !== 'APROVADO'
+          }
+        );
+      }
+    });
+  });
 }
 
 // =============================================================================
@@ -2207,9 +2751,11 @@ function abrirModalPerfilPrestador(prestadorId) {
       <h5 class="text-xs font-bold text-amber-900 uppercase mb-1">Biografia & Apresentação</h5>
       <p class="text-xs text-gray-700">${p.bio || 'Sem biografia informada.'}</p>
       
-      <div class="mt-3 pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs">
+      <div class="mt-3 pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs flex-wrap gap-2">
         <span class="text-gray-600"><i class="fab fa-whatsapp text-green-600 mr-1 text-sm"></i> ${p.whatsapp || p.telefone}</span>
-        <span class="text-gray-600"><i class="fas fa-qrcode text-amber-700 mr-1"></i> Pix: ${p.chavePix || 'Não informada'}</span>
+        <span class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded-md border border-emerald-200 flex items-center gap-1.5">
+          <i class="fas fa-shield-alt text-emerald-600"></i> Chave Pix Protegida (Liberada na Contratação)
+        </span>
       </div>
     </div>
 
