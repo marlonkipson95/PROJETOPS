@@ -400,6 +400,22 @@ async function carregarTodosDadosDemo(db) {
  * Preenche os selects de Cidade e Prestador dinamicamente
  */
 function popularSelectsFiltros() {
+  const selectCat = document.getElementById("filtro-demo-categoria");
+  if (selectCat) {
+    const categorias = new Set();
+    demoState.servicos.forEach(s => { if (s.categoria) categorias.add(s.categoria); });
+    demoState.solicitacoes.forEach(s => { if (s.categoria) categorias.add(s.categoria); });
+    demoState.prestadores.forEach(p => {
+      if (p.categoriaPrincipal) categorias.add(p.categoriaPrincipal);
+      if (Array.isArray(p.categorias)) p.categorias.forEach(c => categorias.add(c));
+    });
+    let html = '<option value="todas">Todas as Categorias</option>';
+    Array.from(categorias).sort().forEach(c => {
+      html += `<option value="${c}">${c}</option>`;
+    });
+    selectCat.innerHTML = html;
+  }
+
   const selectCidade = document.getElementById("filtro-demo-cidade");
   if (selectCidade) {
     const cidades = new Set();

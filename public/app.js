@@ -54,8 +54,10 @@ onAuthStateChanged(auth, async (user) => {
 
 function renderUnauthenticatedNav() {
     authContainer.innerHTML = `
-        <button id="btn-login" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-5 rounded-lg transition-all shadow-sm">
-            Entrar com Google
+        <button id="btn-login" class="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold py-1.5 px-3 sm:py-2 sm:px-4 rounded-xl transition-all shadow-sm flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+            <i class="fab fa-google text-xs sm:text-sm"></i>
+            <span class="hidden sm:inline">Entrar com Google</span>
+            <span class="sm:hidden">Entrar</span>
         </button>
     `;
     document.getElementById('btn-login').addEventListener('click', login);
@@ -94,7 +96,7 @@ function renderWelcomeScreen() {
                         <p class="text-xs sm:text-sm text-amber-800">Inspecione o ranking de prestadores, catálogo de serviços, dezenas de solicitações e simule concorrência de orçamentos sem precisar de login.</p>
                     </div>
                 </div>
-                <button id="btn-banner-demo" class="shrink-0 px-5 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white text-xs font-black rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap">
+                <button id="btn-banner-demo" class="shrink-0 w-full sm:w-auto text-center px-5 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white text-xs font-black rounded-xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap">
                     <i class="fas fa-play mr-1.5"></i> Abrir Área de Testes
                 </button>
             </div>
@@ -2069,9 +2071,18 @@ if (formAiChat) {
             
             if (response.ok) {
                 const data = await response.json();
-                appendMessage('ai', data.resposta);
+                appendMessage('ai', data.resposta || 'Sem resposta disponível no momento.');
             } else {
-                appendMessage('ai', 'Desculpe, ocorreu um erro ao conectar com a API. Verifique se o backend está online.');
+                try {
+                    const errData = await response.json();
+                    if (errData.erro && (errData.erro.includes('429') || errData.erro.toLowerCase().includes('quota'))) {
+                        appendMessage('ai', '⏳ **Aviso de Limite da API:** O limite por minuto da versão gratuita do Gemini foi atingido. Por favor, aguarde cerca de 30 segundos e tente novamente!');
+                    } else {
+                        appendMessage('ai', 'Desculpe, ocorreu um erro ao processar sua pergunta com a IA. Tente novamente em alguns instantes.');
+                    }
+                } catch(err) {
+                    appendMessage('ai', 'Desculpe, ocorreu um erro ao conectar com a API. Verifique se o backend está online.');
+                }
             }
         } catch (error) {
             console.error("Erro no chat IA:", error);
