@@ -229,43 +229,136 @@
         </div>
     </div>
 
-    <!-- Orçamento Modal -->
+    <!-- Orçamento Modal com Discriminação Profissional de Custos -->
     <div id="orcamento-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-xs" aria-hidden="true" id="backdrop-orcamento"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-100">
                 <form id="form-orcamento">
                     <input type="hidden" id="orcamento-solicitacao-id">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-xl leading-6 font-semibold text-gray-900 mb-4">Enviar Orçamento</h3>
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[80vh] overflow-y-auto">
+                        <div class="flex justify-between items-start mb-4 border-b border-gray-100 pb-3">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <i class="fas fa-file-invoice-dollar text-blue-600"></i> Proposta Comercial Detalhada
+                                </h3>
+                                <p class="text-xs text-gray-500">Discrimine etapas, mão de obra e insumos para aumentar a conversão.</p>
+                            </div>
+                            <span class="text-[11px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-md">Proposta Formal</span>
+                        </div>
+
+                        <!-- Template Selector -->
+                        <div class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/70 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-magic text-blue-600 text-sm"></i>
+                                <span class="text-xs font-bold text-blue-900">Orçamento Pré-formatado (Template):</span>
+                            </div>
+                            <select id="select-orc-template" class="text-xs bg-white border border-blue-300 rounded-lg px-2.5 py-1.5 font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Carregar Modelo Rápido --</option>
+                                <option value="eletrica">Revisão Elétrica e Disjuntores (R$ 440,00)</option>
+                                <option value="ar_condicionado">Instalação de Ar-Condicionado Split (R$ 520,00)</option>
+                                <option value="pintura">Pintura Interna c/ Massa Corrida (R$ 680,00)</option>
+                                <option value="hidraulica">Reparo Hidráulico e Válvulas (R$ 310,00)</option>
+                            </select>
+                        </div>
                         
                         <div class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- 1. Escopo e Etapas da Mão de Obra -->
+                            <div>
+                                <label for="orc-escopo" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                                    1. Escopo Detalhado & Etapas da Mão de Obra
+                                </label>
+                                <textarea id="orc-escopo" rows="3" required placeholder="Ex.: Etapa 1: Diagnóstico técnico e isolamento de segurança;&#10;Etapa 2: Execução com ferramental especializado;&#10;Etapa 3: Testes de conformidade, medição e limpeza do local." class="w-full text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 border border-gray-300 rounded-xl p-2.5 outline-none"></textarea>
+                            </div>
+
+                            <!-- 2. Valores Principais -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label for="orc-mao-obra" class="block text-sm font-medium text-gray-700">Mão de Obra (R$)</label>
-                                    <input type="number" step="0.01" min="0" id="orc-mao-obra" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                                    <label for="orc-mao-obra" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                                        Mão de Obra (R$)
+                                    </label>
+                                    <div class="relative rounded-md shadow-xs">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs font-bold">R$</div>
+                                        <input type="number" step="0.01" min="0" id="orc-mao-obra" required placeholder="0,00" class="pl-9 w-full text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 border border-gray-300 rounded-xl p-2.5 outline-none font-semibold">
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="orc-material" class="block text-sm font-medium text-gray-700">Material (R$)</label>
-                                    <input type="number" step="0.01" min="0" id="orc-material" value="0" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+                                    <label for="orc-deslocamento" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                                        Deslocamento / Logística (R$)
+                                    </label>
+                                    <div class="relative rounded-md shadow-xs">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-xs font-bold">R$</div>
+                                        <input type="number" step="0.01" min="0" id="orc-deslocamento" value="0" placeholder="0,00" class="pl-9 w-full text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 border border-gray-300 rounded-xl p-2.5 outline-none font-semibold">
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label for="orc-prazo" class="block text-sm font-medium text-gray-700">Prazo Estimado (em dias)</label>
-                                <input type="number" min="1" id="orc-prazo" required class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border">
+
+                            <!-- 3. Tabela Detalhada de Insumos e Peças -->
+                            <div class="border border-gray-200 rounded-xl p-3 bg-gray-50/60">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
+                                        <i class="fas fa-tools text-amber-600"></i> 2. Peças, Materiais & Insumos
+                                    </span>
+                                    <button type="button" id="btn-add-peca" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                        <i class="fas fa-plus-circle"></i> Adicionar Item
+                                    </button>
+                                </div>
+                                <div id="orc-pecas-container" class="space-y-2">
+                                    <!-- Dynamic rows of items -->
+                                    <div class="grid grid-cols-12 gap-1.5 items-center peca-row">
+                                        <input type="text" placeholder="Item/Peça (ex.: Disjuntor Bipolar 40A)" class="col-span-6 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-desc">
+                                        <input type="number" placeholder="Qtd" value="1" min="1" class="col-span-2 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-qtd">
+                                        <input type="number" step="0.01" min="0" placeholder="Unit (R$)" class="col-span-3 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-unit">
+                                        <button type="button" class="col-span-1 text-gray-400 hover:text-red-600 transition-colors btn-remover-peca text-center" title="Remover item">
+                                            <i class="fas fa-trash-alt text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-right text-xs font-semibold text-gray-600">
+                                    Subtotal de Materiais: <span id="orc-subtotal-pecas" class="text-gray-900 font-bold">R$ 0,00</span>
+                                </div>
                             </div>
+
+                            <!-- 4. Prazo, Condições e Total Consolidado -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="orc-prazo" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Prazo Estimado (em dias)</label>
+                                    <input type="number" min="1" id="orc-prazo" required value="2" class="w-full text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 border border-gray-300 rounded-xl p-2.5 outline-none font-semibold">
+                                </div>
+                                <div>
+                                    <label for="orc-garantia" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Garantia Oferecida</label>
+                                    <select id="orc-garantia" class="w-full text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 border border-gray-300 rounded-xl p-2.5 outline-none font-medium bg-white">
+                                        <option value="90 dias">90 dias (Garantia Padrão)</option>
+                                        <option value="180 dias">180 dias (6 meses)</option>
+                                        <option value="365 dias">1 ano de Garantia</option>
+                                        <option value="30 dias">30 dias</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div>
-                                <label for="orc-observacao" class="block text-sm font-medium text-gray-700">Observações / Condições</label>
-                                <textarea id="orc-observacao" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md p-2"></textarea>
+                                <label for="orc-observacao" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Observações Adicionais / Condições de Pagamento</label>
+                                <textarea id="orc-observacao" rows="2" placeholder="Ex.: Pagamento via Pix após conclusão e aceite formal do serviço. Não inclui reformas de alvenaria externa." class="w-full text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 border border-gray-300 rounded-xl p-2.5 outline-none"></textarea>
+                            </div>
+
+                            <!-- Totalizador Consolidado -->
+                            <div class="bg-gradient-to-r from-gray-900 to-blue-950 text-white rounded-2xl p-4 flex justify-between items-center shadow-md border border-gray-800">
+                                <div>
+                                    <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider block">Valor Total Consolidado</span>
+                                    <span class="text-xs text-blue-200">Mão de Obra + Insumos + Deslocamento</span>
+                                </div>
+                                <div class="text-right">
+                                    <div id="orc-total-consolidado-display" class="text-2xl sm:text-3xl font-black text-emerald-400">R$ 0,00</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
-                        <button type="submit" id="btn-enviar-orcamento" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                            Enviar Proposta
+                    <div class="bg-gray-50 px-4 py-3.5 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100 gap-2">
+                        <button type="submit" id="btn-enviar-orcamento" class="w-full sm:w-auto inline-flex justify-center items-center rounded-xl px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-sm font-bold text-white transition-all shadow-sm cursor-pointer">
+                            <i class="fas fa-paper-plane mr-2 text-xs"></i> Enviar Proposta Formal
                         </button>
-                        <button type="button" id="btn-cancelar-orcamento" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-5 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        <button type="button" id="btn-cancelar-orcamento" class="mt-2 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-gray-300 px-5 py-2.5 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                             Cancelar
                         </button>
                     </div>
@@ -509,67 +602,115 @@
         </div>
     </div>
 
-    <!-- Pix Modal / Demonstrativo de Pagamento e PDF -->
+    <!-- Modal de Fatura Comercial, Decomposição do Orçamento e Checkout Pix Seguro -->
     <div id="pix-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity backdrop-blur-xs no-print" id="backdrop-pix"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100">
-                <!-- Área Imprimível em PDF -->
-                <div id="pix-print-area" class="bg-white p-6 sm:p-8 text-center">
-                    <div class="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
-                        <div class="text-left">
-                            <span class="text-lg font-black text-blue-600">ServiçosApp</span>
-                            <span class="block text-[10px] text-gray-400 uppercase tracking-widest">Demonstrativo de Orçamento & Pix</span>
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-100">
+                <!-- Área Imprimível em PDF / Fatura Comercial -->
+                <div id="pix-print-area" class="bg-white p-6 sm:p-8">
+                    <!-- Cabeçalho da Fatura -->
+                    <div class="flex justify-between items-start border-b border-gray-200 pb-4 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl font-black text-blue-600 tracking-tight">ServiçosApp</span>
+                                <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full uppercase">Fatura Oficial</span>
+                            </div>
+                            <span class="block text-[11px] text-gray-500 mt-0.5">Demonstrativo Comercial & Liquidação Pix</span>
                         </div>
                         <div class="text-right text-xs text-gray-500">
-                            <span class="block font-semibold" id="pix-modal-data">Data de Emissão</span>
-                            <span class="text-[10px] text-emerald-600 font-bold uppercase">Proposta Aprovada</span>
+                            <span class="block font-semibold text-gray-800" id="pix-modal-data">Data de Emissão</span>
+                            <span class="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold uppercase mt-1">
+                                <i class="fas fa-check-circle text-emerald-500"></i> Proposta Formal
+                            </span>
                         </div>
                     </div>
 
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 mb-3 no-print">
-                        <i class="fas fa-qrcode text-emerald-600 text-xl"></i>
+                    <!-- Título do Serviço e Partes -->
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 mb-0.5" id="pix-modal-titulo">Serviço Solicitado</h3>
+                        <p class="text-xs text-gray-600 flex items-center gap-2" id="pix-modal-subtitulo">
+                            <span>Prestador Profissional</span> &bull; <span>Cliente Solicitante</span>
+                        </p>
                     </div>
 
-                    <h3 class="text-lg font-bold text-gray-900 mb-1" id="pix-modal-titulo">Serviço</h3>
-                    <p class="text-xs text-gray-500 mb-4" id="pix-modal-subtitulo">Prestador &bull; Cliente</p>
-
-                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
-                        <span class="text-[10px] text-emerald-800 uppercase font-extrabold tracking-wider block mb-0.5">Valor Total a Pagar</span>
-                        <div class="text-3xl font-black text-emerald-900" id="pix-modal-valor">R$ 0,00</div>
-                    </div>
-
-                    <!-- QR Code Real -->
-                    <div class="mx-auto w-48 h-48 bg-white border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center p-2 mb-4 shadow-2xs">
-                        <img id="pix-qrcode-img" src="" alt="QR Code Pix" class="w-full h-full object-contain">
-                    </div>
-
-                    <div class="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200 text-left">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] text-gray-500 uppercase font-bold">Chave Pix do Prestador</span>
-                            <button type="button" id="btn-copiar-chave-pix" class="text-xs text-blue-600 hover:text-blue-800 font-semibold no-print">
-                                <i class="far fa-copy mr-1"></i> Copiar
-                            </button>
+                    <!-- Decomposição Profissional dos Custos -->
+                    <div id="pix-modal-decomposicao" class="bg-gray-50/80 border border-gray-200 rounded-xl p-3.5 mb-4 text-xs space-y-2.5">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-1.5 font-bold text-gray-700 uppercase tracking-wider text-[10px]">
+                            <span>Discriminação do Orçamento</span>
+                            <span>Prazo & Garantia</span>
                         </div>
-                        <p class="text-xs font-mono text-gray-800 break-all select-all font-semibold" id="pix-modal-chave"></p>
+                        <div id="pix-modal-escopo-container" class="text-gray-700 text-xs">
+                            <span class="font-bold text-gray-900 block mb-0.5">Escopo de Mão de Obra:</span>
+                            <p id="pix-modal-escopo-texto" class="italic text-gray-600 bg-white p-2 rounded-lg border border-gray-100"></p>
+                        </div>
+                        <div id="pix-modal-itens-container" class="space-y-1">
+                            <!-- Insumos e Materiais Injetados Dinamicamente -->
+                        </div>
+                        <div class="flex justify-between items-center text-gray-600 pt-1 border-t border-gray-200 text-xs">
+                            <span>Mão de Obra Especializada:</span>
+                            <span class="font-semibold text-gray-800" id="pix-modal-mao-obra">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-600 text-xs">
+                            <span>Materiais, Peças & Insumos:</span>
+                            <span class="font-semibold text-gray-800" id="pix-modal-materiais">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-600 text-xs">
+                            <span>Taxa de Deslocamento / Logística:</span>
+                            <span class="font-semibold text-gray-800" id="pix-modal-deslocamento">R$ 0,00</span>
+                        </div>
                     </div>
 
-                    <p class="text-[11px] text-gray-400">
-                        Pague com segurança através do aplicativo do seu banco lendo o QR Code ou colando a chave Pix.
-                    </p>
+                    <!-- Bloco Destaque: Valor Total -->
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-4 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-emerald-800 uppercase font-extrabold tracking-wider block">Valor Total Consolidado</span>
+                            <span class="text-xs text-emerald-600">Livre de taxas ocultas</span>
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-black text-emerald-900" id="pix-modal-valor">R$ 0,00</div>
+                    </div>
+
+                    <!-- Seção Segura de Pagamento Pix (Liberada na Aprovação) -->
+                    <div id="pix-checkout-section" class="border-t border-dashed border-gray-200 pt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                                <i class="fab fa-pix text-emerald-600 text-sm"></i> Checkout Pix Seguro
+                            </span>
+                            <span class="text-[10px] text-gray-400">Proteção LGPD / Chave Restrita</span>
+                        </div>
+
+                        <!-- QR Code Real -->
+                        <div class="mx-auto w-40 h-40 bg-white border border-gray-200 rounded-xl flex items-center justify-center p-2 mb-3 shadow-xs">
+                            <img id="pix-qrcode-img" src="" alt="QR Code Pix" class="w-full h-full object-contain">
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-3 border border-gray-200 text-left">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] text-gray-500 uppercase font-bold">Chave Pix para Pagamento</span>
+                                <button type="button" id="btn-copiar-chave-pix" class="text-xs text-blue-600 hover:text-blue-800 font-semibold no-print flex items-center gap-1">
+                                    <i class="far fa-copy"></i> Copiar Chave
+                                </button>
+                            </div>
+                            <p class="text-xs font-mono text-gray-800 break-all select-all font-bold bg-white p-2 rounded-lg border border-gray-200" id="pix-modal-chave"></p>
+                        </div>
+
+                        <p class="text-[11px] text-gray-400 mt-2 text-center">
+                            Abra o app do seu banco, escolha Pix > Ler QR Code ou Copia e Cola. O comprovante é emitido instantaneamente.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Rodapé de Ações (WhatsApp, PDF, Fechar) -->
                 <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3 no-print">
-                    <button type="button" id="btn-whatsapp-pix" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors shadow-xs">
-                        <i class="fab fa-whatsapp mr-1.5 text-sm"></i> Enviar por WhatsApp
+                    <button type="button" id="btn-whatsapp-pix" class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer">
+                        <i class="fab fa-whatsapp mr-2 text-sm"></i> Compartilhar no WhatsApp
                     </button>
                     <div class="flex gap-2 w-full sm:w-auto justify-end">
-                        <button type="button" id="btn-pdf-pix" class="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-lg transition-colors shadow-xs">
-                            <i class="fas fa-file-pdf mr-1.5 text-red-400"></i> Baixar / Imprimir PDF
+                        <button type="button" id="btn-pdf-pix" class="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer">
+                            <i class="fas fa-file-pdf mr-1.5 text-red-400"></i> Imprimir / PDF
                         </button>
-                        <button type="button" id="btn-fechar-pix" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+                        <button type="button" id="btn-fechar-pix" class="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
                             Fechar
                         </button>
                     </div>
@@ -625,8 +766,8 @@
         </div>
     </div>
 
-    <!-- Floating Action Button for AI (Modern Widget) -->
-    <div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center group">
+    <!-- Floating Action Button for AI (Modern Widget - Visível exclusivamente para usuários autenticados) -->
+    <div id="ai-floating-widget-wrapper" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 hidden flex items-center group">
         <button id="btn-open-chat" class="relative flex items-center gap-2.5 sm:gap-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white p-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl hover:shadow-indigo-500/50 hover:scale-105 active:scale-95 transition-all duration-300 border border-white/20 focus:outline-none focus:ring-4 focus:ring-purple-300/50 cursor-pointer">
             <!-- Pulsing outer glow -->
             <span class="absolute -inset-0.5 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-60 blur-xs group-hover:opacity-90 animate-pulse transition-opacity"></span>

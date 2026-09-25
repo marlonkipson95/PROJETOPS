@@ -68,5 +68,32 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.resource.data.solicitanteId == request.auth.uid;
       allow update, delete: if false;
     }
+
+    // 9. Contratações Diretas e Pedidos (Autenticado ou Demo)
+    match /contratacoes/{contratacaoId} {
+      allow read: if isDemo() || (isAuthenticated() && (
+        resource.data.solicitanteId == request.auth.uid ||
+        resource.data.prestadorId == request.auth.uid
+      ));
+      allow create: if isAuthenticated() && request.resource.data.solicitanteId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.solicitanteId == request.auth.uid ||
+        resource.data.prestadorId == request.auth.uid
+      );
+      allow delete: if false;
+    }
+
+    match /pedidos/{pedidoId} {
+      allow read: if isDemo() || (isAuthenticated() && (
+        resource.data.solicitanteId == request.auth.uid ||
+        resource.data.prestadorId == request.auth.uid
+      ));
+      allow create: if isAuthenticated() && request.resource.data.solicitanteId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.solicitanteId == request.auth.uid ||
+        resource.data.prestadorId == request.auth.uid
+      );
+      allow delete: if false;
+    }
   }
 }

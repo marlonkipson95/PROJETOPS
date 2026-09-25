@@ -32,7 +32,13 @@ let demoState = {
     notaMinima: 0,
     buscaTexto: ""
   },
-  abaAtiva: "ranking", // ranking | comentarios | solicitacoes | servicos | orcamentos | fluxo
+  abaAtiva: "cenarios", // cenarios | ranking | comentarios | solicitacoes | servicos | orcamentos | fluxo
+  cenarioAtivo: 1, // 1: Solicitante Puro | 2: Prestador Puro | 3: Perfil Misto
+  subAbaCenario1: "solicitacoes", // solicitacoes | catalogo | concorrencia
+  subAbaCenario2: "perfil", // perfil | propostas | templates
+  subAbaCenario3: "contratante", // contratante | prestador
+  filtroPropostasCenario2: "TODOS",
+  statusOcupacaoCenario2: "Disponível Imediatamente",
   solicitacaoSelecionadaId: null
 };
 
@@ -143,11 +149,99 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
         </div>
       </div>
 
+      <!-- Seletor Rápido de 3 Cenários Realistas (Persona Switcher) -->
+      <div class="bg-gradient-to-br from-gray-900 via-slate-900 to-indigo-950 text-white rounded-2xl p-5 sm:p-6 shadow-xl mb-8 border border-indigo-500/30">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 pb-4 border-b border-white/10">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="bg-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-indigo-400/30">
+                Persona Switcher
+              </span>
+              <span class="text-xs text-indigo-200">Simulação Interativa de Papéis</span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
+              <i class="fas fa-users-cog text-indigo-400"></i> Seletor de Cenários Realistas
+            </h2>
+            <p class="text-xs text-gray-300 mt-0.5">
+              Alterne instantaneamente a aplicação para experimentar o fluxo sob a perspectiva de cada tipo de usuário.
+            </p>
+          </div>
+          <div class="flex items-center gap-1.5 self-start md:self-center">
+            <span class="text-xs text-gray-400 mr-1">Cenário Ativo:</span>
+            <span id="badge-cenario-ativo" class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white shadow-xs">
+              Cenário 1: Solicitante Puro
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="seletor-cenarios-cards">
+          <!-- Card Cenário 1 -->
+          <button type="button" class="btn-trocar-cenario text-left p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer bg-white/10 border-indigo-400 shadow-md ring-2 ring-indigo-400/40" data-cenario="1">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-black uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                <i class="fas fa-shopping-bag"></i> Cenário 1
+              </span>
+              <span class="text-[10px] bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded-full font-bold">Solicitante Puro</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1">Pessoa Física / Empresa Contratante</h4>
+            <p class="text-xs text-gray-300 leading-relaxed mb-3">
+              Cadastro com CPF validado, sem reputação de prestador. Foco em criar demandas, comparar orçamentos concorrentes e contratar.
+            </p>
+            <div class="flex items-center gap-2 text-[11px] text-indigo-200 font-semibold flex-wrap">
+              <span>• Minhas Demandas</span>
+              <span>• Catálogo Direto</span>
+              <span>• Mural Concorrência</span>
+            </div>
+          </button>
+
+          <!-- Card Cenário 2 -->
+          <button type="button" class="btn-trocar-cenario text-left p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20" data-cenario="2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                <i class="fas fa-tools"></i> Cenário 2
+              </span>
+              <span class="text-[10px] bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full font-bold">Prestador Puro</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1">MEI / Empresa Especialista</h4>
+            <p class="text-xs text-gray-300 leading-relaxed mb-3">
+              CNPJ ativo, bio detalhada, horários de atendimento, status de ocupação, score de credibilidade e propostas pré-formatadas.
+            </p>
+            <div class="flex items-center gap-2 text-[11px] text-amber-200 font-semibold flex-wrap">
+              <span>• Status Ocupação</span>
+              <span>• Histórico Propostas</span>
+              <span>• Templates Salvos</span>
+            </div>
+          </button>
+
+          <!-- Card Cenário 3 -->
+          <button type="button" class="btn-trocar-cenario text-left p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20" data-cenario="3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                <i class="fas fa-random"></i> Cenário 3
+              </span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-200 px-2 py-0.5 rounded-full font-bold">Perfil Misto</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1">Papel Dual (Ambos)</h4>
+            <p class="text-xs text-gray-300 leading-relaxed mb-3">
+              Alternância fluida em 1 clique entre o papel de quem contrata serviços e de quem atua prestando e emitindo propostas.
+            </p>
+            <div class="flex items-center gap-2 text-[11px] text-emerald-200 font-semibold flex-wrap">
+              <span>• Toggle Contratante</span>
+              <span>• Toggle Prestador</span>
+              <span>• Visão Unificada</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
       <!-- Navegação das Abas de Teste -->
       <div class="border-b border-gray-200 mb-6 overflow-x-auto">
         <nav class="-mb-px flex space-x-2 sm:space-x-6 min-w-max" id="demo-tabs-nav">
-          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-amber-600 text-amber-700" data-aba="ranking">
-            <i class="fas fa-trophy text-amber-500"></i> Ranking de Demonstração
+          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-indigo-600 text-indigo-700" data-aba="cenarios">
+            <i class="fas fa-users-cog text-indigo-500"></i> Simulação de Cenários (3 Perfis)
+          </button>
+          <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="ranking">
+            <i class="fas fa-trophy text-amber-500"></i> Ranking Geral (${demoState.prestadores.length || 15})
           </button>
           <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="comentarios">
             <i class="fas fa-comments text-blue-500"></i> Avaliações e Comentários
@@ -156,7 +250,7 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
             <i class="fas fa-clipboard-list text-purple-500"></i> Solicitações & Propostas
           </button>
           <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="servicos">
-            <i class="fas fa-boxes text-emerald-500"></i> Catálogo de Serviços (112)
+            <i class="fas fa-boxes text-emerald-500"></i> Catálogo de Serviços
           </button>
           <button class="tab-demo-btn py-3 px-3 border-b-2 font-semibold text-xs sm:text-sm flex items-center gap-2 border-transparent text-gray-500 hover:text-gray-700" data-aba="orcamentos">
             <i class="fas fa-calculator text-indigo-500"></i> Orçamentos Detalhados
@@ -242,17 +336,60 @@ export async function inicializarAreaTestes(db, containerEl, onVoltarDashboard) 
     btn.disabled = false;
   });
 
-  // Listeners de Abas
+  // Listeners dos Cards do Seletor de Cenários
+  const btnCenarios = containerEl.querySelectorAll(".btn-trocar-cenario");
   const tabButtons = containerEl.querySelectorAll(".tab-demo-btn");
+
+  btnCenarios.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const cId = parseInt(btn.getAttribute("data-cenario"), 10) || 1;
+      demoState.cenarioAtivo = cId;
+      demoState.abaAtiva = "cenarios";
+      
+      btnCenarios.forEach(b => {
+        b.classList.remove("bg-white/10", "border-indigo-400", "shadow-md", "ring-2", "ring-indigo-400/40");
+        b.classList.add("bg-white/5", "border-white/10");
+      });
+      btn.classList.remove("bg-white/5", "border-white/10");
+      btn.classList.add("bg-white/10", "border-indigo-400", "shadow-md", "ring-2", "ring-indigo-400/40");
+
+      const badgeAtivo = document.getElementById("badge-cenario-ativo");
+      if (badgeAtivo) {
+        if (cId === 1) badgeAtivo.textContent = "Cenário 1: Solicitante Puro";
+        else if (cId === 2) badgeAtivo.textContent = "Cenário 2: Prestador Puro";
+        else badgeAtivo.textContent = "Cenário 3: Perfil Misto";
+      }
+
+      tabButtons.forEach(b => {
+        if (b.getAttribute("data-aba") === "cenarios") {
+          b.classList.remove("border-transparent", "text-gray-500");
+          b.classList.add("border-indigo-600", "text-indigo-700");
+        } else {
+          b.classList.remove("border-indigo-600", "text-indigo-700", "border-amber-600", "text-amber-700");
+          b.classList.add("border-transparent", "text-gray-500");
+        }
+      });
+
+      renderizarAbaAtiva();
+    });
+  });
+
+  // Listeners de Abas Gerais
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       tabButtons.forEach(b => {
-        b.classList.remove("border-amber-600", "text-amber-700");
+        b.classList.remove("border-indigo-600", "text-indigo-700", "border-amber-600", "text-amber-700");
         b.classList.add("border-transparent", "text-gray-500");
       });
-      btn.classList.remove("border-transparent", "text-gray-500");
-      btn.classList.add("border-amber-600", "text-amber-700");
-      demoState.abaAtiva = btn.getAttribute("data-aba");
+      const aba = btn.getAttribute("data-aba");
+      demoState.abaAtiva = aba;
+      if (aba === "cenarios") {
+        btn.classList.remove("border-transparent", "text-gray-500");
+        btn.classList.add("border-indigo-600", "text-indigo-700");
+      } else {
+        btn.classList.remove("border-transparent", "text-gray-500");
+        btn.classList.add("border-amber-600", "text-amber-700");
+      }
       renderizarAbaAtiva();
     });
   });
@@ -507,6 +644,9 @@ function renderizarAbaAtiva() {
   if (!container) return;
 
   switch (demoState.abaAtiva) {
+    case "cenarios":
+      renderizarSimuladorCenarios(container);
+      break;
     case "ranking":
       renderizarRanking(container);
       break;
@@ -526,9 +666,779 @@ function renderizarAbaAtiva() {
       renderizarSimulacaoFluxo(container);
       break;
     default:
-      renderizarRanking(container);
+      renderizarSimuladorCenarios(container);
   }
 }
+
+// =============================================================================
+// 0. ABA: SIMULAÇÃO DE CENÁRIOS REALISTAS (3 PERSONAS)
+// =============================================================================
+
+function renderizarSimuladorCenarios(container) {
+  if (!container) return;
+
+  const cenario = demoState.cenarioAtivo || 1;
+
+  if (cenario === 1) {
+    renderizarCenario1Solicitante(container);
+  } else if (cenario === 2) {
+    renderizarCenario2Prestador(container);
+  } else {
+    renderizarCenario3Misto(container);
+  }
+}
+
+/**
+ * CENÁRIO 1: SOLICITANTE PURO (PF / PJ Contratante)
+ */
+function renderizarCenario1Solicitante(container) {
+  const subAba = demoState.subAbaCenario1 || 'solicitacoes';
+
+  // Filtra solicitações do solicitante demo ou primeiras 3 solicitações
+  const solicitacoesDemo = demoState.solicitacoes.slice(0, 4);
+
+  let conteudoSubAba = '';
+
+  if (subAba === 'solicitacoes') {
+    conteudoSubAba = `
+      <div class="space-y-4 animate-fadeIn">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Minhas Demandas Criadas (${solicitacoesDemo.length})</h4>
+          <span class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg font-semibold">
+            <i class="fas fa-info-circle mr-1"></i> Orçamentos recebidos diretamente de prestadores
+          </span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${solicitacoesDemo.map((s, idx) => {
+            const orcsDesta = demoState.orcamentos.filter(o => o.solicitacaoId === s.id);
+            let statusColor = 'bg-amber-100 text-amber-800 border-amber-200';
+            if (s.status === 'CONTRATADA') statusColor = 'bg-blue-100 text-blue-800 border-blue-200';
+            if (s.status === 'CONCLUIDA') statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+
+            return `
+              <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
+                <div class="flex justify-between items-start mb-2 gap-2">
+                  <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border ${statusColor}">
+                    ${s.status}
+                  </span>
+                  <span class="text-xs text-gray-400"><i class="fas fa-map-marker-alt mr-1"></i>${s.endereco || 'São Paulo, SP'}</span>
+                </div>
+                <h5 class="text-base font-bold text-gray-900 mb-1.5">${s.titulo}</h5>
+                <p class="text-xs text-gray-600 line-clamp-2 mb-4 leading-relaxed">${s.descricao}</p>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100 text-xs">
+                  <span class="text-gray-700 font-semibold flex items-center gap-1.5">
+                    <i class="fas fa-file-invoice-dollar text-indigo-600"></i> ${orcsDesta.length} Propostas Recebidas
+                  </span>
+                  <button type="button" class="btn-ver-concorrencia-cenario text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-xs" data-solic-id="${s.id}">
+                    Ver Propostas
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  } else if (subAba === 'catalogo') {
+    const servicosAmostra = demoState.servicos.slice(0, 6);
+    conteudoSubAba = `
+      <div class="space-y-4 animate-fadeIn">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Catálogo de Serviços Avulsos Disponíveis</h4>
+          <span class="text-xs text-gray-500">Contratação direta com preço base tabelado</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${servicosAmostra.map(srv => `
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs flex flex-col justify-between hover:border-indigo-400 transition-colors">
+              <div>
+                <span class="text-[10px] bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider">${srv.categoria}</span>
+                <h5 class="text-sm font-bold text-gray-900 mt-2 mb-1">${srv.titulo}</h5>
+                <p class="text-xs text-gray-500 line-clamp-2 mb-3">${srv.descricao || 'Atendimento com profissional especializado e com garantia.'}</p>
+              </div>
+              <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] text-gray-400 block font-bold uppercase">Preço Base</span>
+                  <span class="text-base font-black text-emerald-600">R$ ${(srv.valor_base || srv.valor || 150).toFixed(2).replace('.', ',')}</span>
+                </div>
+                <button type="button" class="btn-simular-contratacao-direta px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-xs cursor-pointer" data-id="${srv.id}" data-titulo="${srv.titulo}">
+                  <i class="fas fa-check-circle mr-1"></i> Contratar
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else {
+    // Mural Comparativo de Concorrência
+    conteudoSubAba = `
+      <div class="space-y-5 animate-fadeIn">
+        <div class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white rounded-2xl p-5 border border-indigo-400/30">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="bg-emerald-500 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">Demanda em Análise</span>
+            <span class="text-xs text-blue-200">ID: solic_demo_eletrica_01</span>
+          </div>
+          <h4 class="text-lg font-bold">Troca Completa de Fiação e Instalação de Quadro com Barramento Bifásico</h4>
+          <p class="text-xs text-blue-100 mt-1 max-w-2xl">
+            Imóvel residencial antigo em São Paulo necessitando substituição de cabos de 2.5mm para 4mm/6mm, disjuntores DIN e aterramento TT.
+          </p>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">
+            Comparativo de Propostas Concorrentes Recebidas (3 Orçamentos)
+          </h4>
+          <span class="text-xs text-gray-500">Avalie reputação vs preço vs insumos</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Proposta A -->
+          <div class="bg-white border-2 border-indigo-500 rounded-2xl p-5 shadow-md flex flex-col justify-between relative">
+            <span class="absolute -top-3 right-4 bg-indigo-600 text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-xs">
+              Mais Recomendada
+            </span>
+            <div>
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">CE</div>
+                <div>
+                  <h5 class="text-sm font-bold text-gray-900">Carlos Eletricista</h5>
+                  <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
+                    <i class="fas fa-star text-[10px]"></i> 4.9 <span class="text-gray-400 font-normal">(52 avaliações)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
+                <div class="flex justify-between"><span>Mão de Obra:</span><span class="font-bold text-gray-800">R$ 450,00</span></div>
+                <div class="flex justify-between"><span>Materiais (Cabos/Disjuntores):</span><span class="font-bold text-gray-800">R$ 180,00</span></div>
+                <div class="flex justify-between"><span>Deslocamento:</span><span class="font-bold text-gray-800">R$ 30,00</span></div>
+                <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500"><span>Prazo:</span><span class="font-semibold text-gray-700">2 dias úteis</span></div>
+                <div class="flex justify-between text-gray-500"><span>Garantia:</span><span class="font-semibold text-emerald-700">180 dias</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-baseline mb-3">
+                <span class="text-xs text-gray-500 font-bold">TOTAL:</span>
+                <span class="text-2xl font-black text-gray-900">R$ 660,00</span>
+              </div>
+              <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prestador="Carlos Eletricista" data-valor="R$ 660,00">
+                <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
+              </button>
+            </div>
+          </div>
+
+          <!-- Proposta B -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">RS</div>
+                <div>
+                  <h5 class="text-sm font-bold text-gray-900">Roberto Silva Instalações</h5>
+                  <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
+                    <i class="fas fa-star text-[10px]"></i> 5.0 <span class="text-gray-400 font-normal">(64 avaliações)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
+                <div class="flex justify-between"><span>Mão de Obra:</span><span class="font-bold text-gray-800">R$ 520,00</span></div>
+                <div class="flex justify-between"><span>Materiais (Disjuntores DIN):</span><span class="font-bold text-gray-800">R$ 160,00</span></div>
+                <div class="flex justify-between"><span>Deslocamento:</span><span class="font-bold text-emerald-600 font-semibold">Grátis</span></div>
+                <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500"><span>Prazo:</span><span class="font-semibold text-gray-700">1 dia (Emergencial)</span></div>
+                <div class="flex justify-between text-gray-500"><span>Garantia:</span><span class="font-semibold text-emerald-700">365 dias (1 ano)</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-baseline mb-3">
+                <span class="text-xs text-gray-500 font-bold">TOTAL:</span>
+                <span class="text-2xl font-black text-gray-900">R$ 680,00</span>
+              </div>
+              <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prestador="Roberto Silva" data-valor="R$ 680,00">
+                <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
+              </button>
+            </div>
+          </div>
+
+          <!-- Proposta C -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm">LF</div>
+                <div>
+                  <h5 class="text-sm font-bold text-gray-900">Luz & Força MEI</h5>
+                  <div class="flex items-center text-xs text-amber-500 font-bold gap-1">
+                    <i class="fas fa-star text-[10px]"></i> 4.7 <span class="text-gray-400 font-normal">(38 avaliações)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3 text-xs space-y-1.5 mb-3 border border-gray-100">
+                <div class="flex justify-between"><span>Mão de Obra:</span><span class="font-bold text-gray-800">R$ 400,00</span></div>
+                <div class="flex justify-between"><span>Materiais:</span><span class="font-bold text-gray-800">R$ 210,00</span></div>
+                <div class="flex justify-between"><span>Deslocamento:</span><span class="font-bold text-gray-800">R$ 40,00</span></div>
+                <div class="flex justify-between border-t border-gray-200 pt-1 text-gray-500"><span>Prazo:</span><span class="font-semibold text-gray-700">3 dias úteis</span></div>
+                <div class="flex justify-between text-gray-500"><span>Garantia:</span><span class="font-semibold text-emerald-700">90 dias</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-baseline mb-3">
+                <span class="text-xs text-gray-500 font-bold">TOTAL:</span>
+                <span class="text-2xl font-black text-gray-900">R$ 650,00</span>
+              </div>
+              <button type="button" class="btn-simular-aceite-proposta w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5" data-prestador="Luz & Força MEI" data-valor="R$ 650,00">
+                <i class="fas fa-check-circle"></i> Aceitar Esta Proposta
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="space-y-6">
+      <!-- Card do Perfil do Solicitante -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center text-xl font-bold shrink-0 shadow-sm">
+            JM
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-0.5">
+              <h3 class="text-lg font-bold text-gray-900">Juliana Mendes da Silva</h3>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                <i class="fas fa-check-circle text-emerald-500 mr-1"></i> CPF Validado
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 flex items-center gap-3">
+              <span><i class="fas fa-id-card text-gray-400 mr-1"></i> CPF: ***.748.291-**</span>
+              <span><i class="fas fa-map-marker-alt text-gray-400 mr-1"></i> São Paulo - SP</span>
+              <span><i class="fas fa-user-tag text-gray-400 mr-1"></i> Solicitante Puro (Sem pontos de ranking)</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Seletor de Sub-Abas do Cenário 1 -->
+        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+          <button type="button" class="btn-subaba-c1 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'solicitacoes' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="solicitacoes">
+            Minhas Demandas
+          </button>
+          <button type="button" class="btn-subaba-c1 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'catalogo' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="catalogo">
+            Catálogo Avulso
+          </button>
+          <button type="button" class="btn-subaba-c1 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'concorrencia' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="concorrencia">
+            Mural Concorrência
+          </button>
+        </div>
+      </div>
+
+      <!-- Conteúdo da Sub-Aba -->
+      ${conteudoSubAba}
+    </div>
+  `;
+
+  // Bind eventos da sub-aba
+  container.querySelectorAll('.btn-subaba-c1').forEach(b => {
+    b.addEventListener('click', () => {
+      demoState.subAbaCenario1 = b.getAttribute('data-subaba');
+      renderizarCenario1Solicitante(container);
+    });
+  });
+
+  // Bind ver concorrencia
+  container.querySelectorAll('.btn-ver-concorrencia-cenario').forEach(b => {
+    b.addEventListener('click', () => {
+      demoState.subAbaCenario1 = 'concorrencia';
+      renderizarCenario1Solicitante(container);
+    });
+  });
+
+  // Bind simular contratação direta
+  container.querySelectorAll('.btn-simular-contratacao-direta').forEach(b => {
+    b.addEventListener('click', () => {
+      const titulo = b.getAttribute('data-titulo');
+      alert(`Simulação de Contratação Direta: "${titulo}" contratado com sucesso! A solicitação foi criada para o prestador.`);
+    });
+  });
+
+  // Bind simular aceite de proposta
+  container.querySelectorAll('.btn-simular-aceite-proposta').forEach(b => {
+    b.addEventListener('click', () => {
+      const prest = b.getAttribute('data-prestador');
+      const val = b.getAttribute('data-valor');
+      alert(`Parabéns! Proposta de ${prest} no valor de ${val} aceita com sucesso! O demonstrativo de pagamento Pix e a fatura formal foram liberados.`);
+    });
+  });
+}
+
+/**
+ * CENÁRIO 2: PRESTADOR PURO (Autônomo / MEI / Empresa)
+ */
+function renderizarCenario2Prestador(container) {
+  const subAba = demoState.subAbaCenario2 || 'perfil';
+  const statusOcupacao = demoState.statusOcupacaoCenario2 || 'Disponível Imediatamente';
+  const filtroStatus = demoState.filtroPropostasCenario2 || 'TODOS';
+
+  // Propostas enviadas pelo prestador demo
+  const propostasEnviadas = [
+    {
+      id: 'prop_01',
+      solicitacaoTitulo: 'Instalação de Ar-Condicionado Split 12.000 BTUs',
+      cliente: 'Mariana Azevedo',
+      escopo: 'Etapa 1: Fixação dos suportes e furação;\nEtapa 2: Tubulação de cobre e isolamento térmico;\nEtapa 3: Vácuo com bomba e testes de vazamento.',
+      maoDeObra: 380.00,
+      material: 140.00,
+      outrosCustos: 40.00,
+      total: 560.00,
+      prazo: 1,
+      garantia: '365 dias',
+      status: 'APROVADO'
+    },
+    {
+      id: 'prop_02',
+      solicitacaoTitulo: 'Troca de Disjuntores e Quadro de Luz Residencial',
+      cliente: 'Fernando Costa',
+      escopo: 'Etapa 1: Inspeção termográfica;\nEtapa 2: Substituição de 4 disjuntores DIN;\nEtapa 3: Aperto de barramento e balanceamento.',
+      maoDeObra: 280.00,
+      material: 160.00,
+      outrosCustos: 30.00,
+      total: 470.00,
+      prazo: 1,
+      garantia: '180 dias',
+      status: 'AGUARDANDO'
+    },
+    {
+      id: 'prop_03',
+      solicitacaoTitulo: 'Instalação de 8 Luminárias LED de Embutir',
+      cliente: 'Patrícia Rocha',
+      escopo: 'Recorte em gesso, cabeamento paralelo e fixação de spots.',
+      maoDeObra: 200.00,
+      material: 90.00,
+      outrosCustos: 0.00,
+      total: 290.00,
+      prazo: 1,
+      garantia: '90 dias',
+      status: 'REPROVADO'
+    }
+  ];
+
+  const propostasFiltradas = filtroStatus === 'TODOS' ? 
+    propostasEnviadas : propostasEnviadas.filter(p => p.status === filtroStatus);
+
+  let conteudoSubAba = '';
+
+  if (subAba === 'perfil') {
+    conteudoSubAba = `
+      <div class="space-y-5 animate-fadeIn">
+        <!-- Status de Ocupação e Credibilidade -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Card de Ocupação -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Status de Ocupação & Agenda</h4>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-3 h-3 rounded-full ${statusOcupacao.includes('Disponível') ? 'bg-emerald-500 animate-pulse' : (statusOcupacao.includes('lotada') ? 'bg-amber-500' : 'bg-gray-400')}"></span>
+              <span class="text-base font-bold text-gray-900">${statusOcupacao}</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Defina sua disponibilidade para novos atendimentos na região:</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" class="btn-mudar-ocupacao text-center px-2 py-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${statusOcupacao === 'Disponível Imediatamente' ? 'bg-emerald-50 border-emerald-400 text-emerald-800' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}" data-status="Disponível Imediatamente">
+                <i class="fas fa-check-circle text-emerald-600 block text-sm mb-1"></i> Disponível
+              </button>
+              <button type="button" class="btn-mudar-ocupacao text-center px-2 py-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${statusOcupacao === 'Agenda Lotada (3 dias)' ? 'bg-amber-50 border-amber-400 text-amber-800' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}" data-status="Agenda Lotada (3 dias)">
+                <i class="fas fa-clock text-amber-600 block text-sm mb-1"></i> Agenda Cheia
+              </button>
+              <button type="button" class="btn-mudar-ocupacao text-center px-2 py-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${statusOcupacao === 'Indisponível Temporariamente' ? 'bg-gray-100 border-gray-400 text-gray-800' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}" data-status="Indisponível Temporariamente">
+                <i class="fas fa-ban text-gray-500 block text-sm mb-1"></i> Indisponível
+              </button>
+            </div>
+          </div>
+
+          <!-- Indicador de Credibilidade / Score -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Índice de Credibilidade</h4>
+              <span class="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Score 98/100</span>
+            </div>
+            <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-3">
+              <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full" style="width: 98%"></div>
+            </div>
+            <div class="space-y-1.5 text-xs text-gray-600">
+              <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500 text-xs"></i> <span>CNPJ ativo e verificado na Receita Federal</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500 text-xs"></i> <span>2 anos e 8 meses de histórico contínuo</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500 text-xs"></i> <span>52 avaliações reais verificadas (Média: 4.9⭐)</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-500 text-xs"></i> <span>Tempo médio de resposta a orçamentos: 14 minutos</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Horários de Atendimento e Bio -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
+          <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <i class="fas fa-calendar-alt text-indigo-600"></i> Horários e Regimes de Atendimento
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-4">
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <span class="font-bold text-gray-900 block mb-1">Dias Úteis:</span>
+              <span class="text-gray-600">Segunda a Sexta: 08:00 às 18:00</span>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <span class="font-bold text-gray-900 block mb-1">Fins de Semana:</span>
+              <span class="text-gray-600">Plantão aos Sábados: 08:00 às 14:00</span>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <span class="font-bold text-gray-900 block mb-1">Regime Emergencial:</span>
+              <span class="text-emerald-700 font-semibold">Atendimento Noturno 24h sob consulta</span>
+            </div>
+          </div>
+          <div class="border-t border-gray-100 pt-3">
+            <span class="font-bold text-xs text-gray-900 block mb-1">Especialidades Cadastradas:</span>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="bg-indigo-50 text-indigo-800 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-indigo-100">Elétrica Predial NBR 5410</span>
+              <span class="bg-indigo-50 text-indigo-800 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-indigo-100">Automação Residencial</span>
+              <span class="bg-indigo-50 text-indigo-800 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-indigo-100">Ar-Condicionado Split & Inverter</span>
+              <span class="bg-indigo-50 text-indigo-800 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-indigo-100">Padrão de Entrada Enel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (subAba === 'propostas') {
+    conteudoSubAba = `
+      <div class="space-y-4 animate-fadeIn">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
+          <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">
+            Histórico de Propostas Enviadas (${propostasFiltradas.length})
+          </h4>
+          
+          <!-- Filtro de Status -->
+          <div class="flex p-1 bg-gray-100 rounded-xl text-xs overflow-x-auto w-full sm:w-auto">
+            ${['TODOS', 'AGUARDANDO', 'APROVADO', 'REPROVADO'].map(st => `
+              <button type="button" class="btn-filtro-prop px-3 py-1 rounded-lg font-bold transition-all ${filtroStatus === st ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-status="${st}">
+                ${st}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          ${propostasFiltradas.map(p => {
+            let badgeStatus = '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">AGUARDANDO DECISÃO</span>';
+            if (p.status === 'APROVADO') badgeStatus = '<span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">APROVADO PELO CLIENTE</span>';
+            if (p.status === 'REPROVADO') badgeStatus = '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-800">REPROVADO</span>';
+
+            return `
+              <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
+                <div class="flex justify-between items-start gap-2 mb-2">
+                  <div>
+                    <h5 class="text-base font-bold text-gray-900 mb-0.5">${p.solicitacaoTitulo}</h5>
+                    <span class="text-xs text-gray-500">Cliente: <b>${p.cliente}</b></span>
+                  </div>
+                  ${badgeStatus}
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-3 text-xs text-gray-700 my-3 border border-gray-100">
+                  <span class="font-bold text-gray-900 block mb-1">Escopo discriminado:</span>
+                  <p class="whitespace-pre-line text-gray-600 mb-2">${p.escopo}</p>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-gray-200 text-[11px]">
+                    <div><span>Mão de Obra:</span><br><b class="text-gray-900">R$ ${p.maoDeObra.toFixed(2)}</b></div>
+                    <div><span>Materiais:</span><br><b class="text-gray-900">R$ ${p.material.toFixed(2)}</b></div>
+                    <div><span>Deslocamento:</span><br><b class="text-gray-900">R$ ${p.outrosCustos.toFixed(2)}</b></div>
+                    <div><span>Prazo & Garantia:</span><br><b class="text-gray-900">${p.prazo} dia(s) (${p.garantia})</b></div>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                  <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase block">Valor Total</span>
+                    <span class="text-xl font-black text-gray-900">R$ ${p.total.toFixed(2).replace('.', ',')}</span>
+                  </div>
+                  ${p.status === 'APROVADO' ? `
+                    <button type="button" class="btn-abrir-fatura-prestador px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5" data-titulo="${p.solicitacaoTitulo}" data-valor="R$ ${p.total.toFixed(2).replace('.', ',')}">
+                      <i class="fab fa-pix"></i> Demonstrativo Pix & PDF
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  } else {
+    // Módulo de Orçamentos Pré-formatados (Templates)
+    conteudoSubAba = `
+      <div class="space-y-4 animate-fadeIn">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Orçamentos Pré-formatados (Templates Salvos)</h4>
+            <p class="text-xs text-gray-500">Propostas modelo estruturadas prontas para vinculação e envio instantâneo</p>
+          </div>
+          <span class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-lg font-bold">
+            4 Modelos Ativos
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Template 1 -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-indigo-400 transition-colors">
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-md uppercase">Climatização</span>
+                <span class="text-xs font-bold text-gray-500">Prazo: 1 dia</span>
+              </div>
+              <h5 class="text-base font-bold text-gray-900 mb-1.5">Instalação de Ar-Condicionado Split (até 12.000 BTUs)</h5>
+              <div class="bg-gray-50 rounded-xl p-3 text-xs text-gray-600 mb-3 border border-gray-100">
+                <span class="font-bold text-gray-900 block mb-1">Escopo das 3 Etapas:</span>
+                <p>1. Suportes e furação; 2. Linha de cobre com isolamento térmico; 3. Teste de estanqueidade e vácuo.</p>
+                <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[11px] font-semibold">
+                  <span>Mão de Obra: R$ 380,00</span>
+                  <span>Insumos: R$ 140,00</span>
+                </div>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-gray-400 font-bold uppercase block">Total Padrão</span>
+                <span class="text-xl font-black text-gray-900">R$ 520,00</span>
+              </div>
+              <button type="button" class="btn-copiar-template px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-xs" data-tpl="ar">
+                <i class="far fa-copy mr-1"></i> Usar Modelo
+              </button>
+            </div>
+          </div>
+
+          <!-- Template 2 -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-indigo-400 transition-colors">
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md uppercase">Elétrica</span>
+                <span class="text-xs font-bold text-gray-500">Prazo: 1 dia</span>
+              </div>
+              <h5 class="text-base font-bold text-gray-900 mb-1.5">Revisão Elétrica e Troca de Disjuntores DIN</h5>
+              <div class="bg-gray-50 rounded-xl p-3 text-xs text-gray-600 mb-3 border border-gray-100">
+                <span class="font-bold text-gray-900 block mb-1">Escopo das 3 Etapas:</span>
+                <p>1. Inspeção de circuitos; 2. Substituição de 4 disjuntores DIN; 3. Balanceamento de cargas e testes.</p>
+                <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[11px] font-semibold">
+                  <span>Mão de Obra: R$ 280,00</span>
+                  <span>Insumos: R$ 160,00</span>
+                </div>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-gray-400 font-bold uppercase block">Total Padrão</span>
+                <span class="text-xl font-black text-gray-900">R$ 440,00</span>
+              </div>
+              <button type="button" class="btn-copiar-template px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-xs" data-tpl="eletrica">
+                <i class="far fa-copy mr-1"></i> Usar Modelo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="space-y-6">
+      <!-- Card do Perfil do Prestador -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center text-xl font-bold shrink-0 shadow-sm">
+            MV
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+              <h3 class="text-lg font-bold text-gray-900">Marcos Vinicius Santos</h3>
+              <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full border border-blue-200">
+                <i class="fas fa-certificate text-blue-500 mr-1"></i> CNPJ MEI Verificado
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 flex items-center gap-3 flex-wrap">
+              <span><b>M.V. Climatização & Elétrica MEI</b> (CNPJ: 45.892.120/0001-90)</span>
+              <span><i class="fas fa-map-marker-alt text-gray-400 mr-1"></i> São Paulo e Região</span>
+              <span class="text-amber-600 font-bold"><i class="fas fa-star text-[10px]"></i> 4.9⭐ (52 avaliações)</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Seletor de Sub-Abas do Cenário 2 -->
+        <div class="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+          <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'perfil' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="perfil">
+            Perfil & Agenda
+          </button>
+          <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'propostas' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="propostas">
+            Histórico Propostas
+          </button>
+          <button type="button" class="btn-subaba-c2 flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${subAba === 'templates' ? 'bg-white text-indigo-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-subaba="templates">
+            Templates Salvos
+          </button>
+        </div>
+      </div>
+
+      <!-- Conteúdo da Sub-Aba -->
+      ${conteudoSubAba}
+    </div>
+  `;
+
+  // Bind eventos da sub-aba
+  container.querySelectorAll('.btn-subaba-c2').forEach(b => {
+    b.addEventListener('click', () => {
+      demoState.subAbaCenario2 = b.getAttribute('data-subaba');
+      renderizarCenario2Prestador(container);
+    });
+  });
+
+  // Bind mudança de ocupação
+  container.querySelectorAll('.btn-mudar-ocupacao').forEach(b => {
+    b.addEventListener('click', () => {
+      demoState.statusOcupacaoCenario2 = b.getAttribute('data-status');
+      renderizarCenario2Prestador(container);
+    });
+  });
+
+  // Bind filtros de propostas
+  container.querySelectorAll('.btn-filtro-prop').forEach(b => {
+    b.addEventListener('click', () => {
+      demoState.filtroPropostasCenario2 = b.getAttribute('data-status');
+      renderizarCenario2Prestador(container);
+    });
+  });
+
+  // Bind abrir fatura prestador
+  container.querySelectorAll('.btn-abrir-fatura-prestador').forEach(b => {
+    b.addEventListener('click', () => {
+      const tit = b.getAttribute('data-titulo');
+      const val = b.getAttribute('data-valor');
+      alert(`Demonstrativo Comercial & Fatura Pix de "${tit}" (${val}) gerado! Pronto para impressão e envio ao cliente.`);
+    });
+  });
+
+  // Bind copiar template
+  container.querySelectorAll('.btn-copiar-template').forEach(b => {
+    b.addEventListener('click', () => {
+      alert("Modelo carregado com sucesso! Os campos de escopo, etapas, peças e mão de obra foram pré-preenchidos.");
+    });
+  });
+}
+
+/**
+ * CENÁRIO 3: PERFIL MISTO (AMBOS - Contratante & Prestador)
+ */
+function renderizarCenario3Misto(container) {
+  const visao = demoState.subAbaCenario3 || 'contratante';
+
+  container.innerHTML = `
+    <div class="space-y-6">
+      <!-- Card do Perfil Misto com Toggle Switch -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-xl font-bold shrink-0 shadow-sm">
+            AF
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-0.5">
+              <h3 class="text-lg font-bold text-gray-900">Ana Carolina Ferraz</h3>
+              <span class="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full border border-purple-200">
+                Perfil Dual: Ambos
+              </span>
+            </div>
+            <p class="text-xs text-gray-500">
+              Contratante de reformas residenciais & Consultora Técnica de Interiores
+            </p>
+          </div>
+        </div>
+
+        <!-- Toggle Switch Unificado -->
+        <div class="flex items-center p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+          <button type="button" class="btn-toggle-misto flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${visao === 'contratante' ? 'bg-white text-emerald-800 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-visao="contratante">
+            <i class="fas fa-shopping-cart text-emerald-600"></i> Visão Solicitante
+          </button>
+          <button type="button" class="btn-toggle-misto flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${visao === 'prestador' ? 'bg-white text-indigo-800 shadow-xs' : 'text-gray-600 hover:text-gray-900'}" data-visao="prestador">
+            <i class="fas fa-briefcase text-indigo-600"></i> Visão Prestadora
+          </button>
+        </div>
+      </div>
+
+      <!-- Conteúdo dependente da visão selecionada -->
+      <div class="animate-fadeIn">
+        ${visao === 'contratante' ? `
+          <div class="space-y-4">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex justify-between items-center">
+              <div>
+                <h4 class="text-sm font-bold text-emerald-900">Ambiente do Contratante Ativo</h4>
+                <p class="text-xs text-emerald-700">Você está navegando como cliente: gerenciando reformas e contratando profissionais.</p>
+              </div>
+              <button type="button" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-xs" onclick="alert('Simulação: Abrindo formulário de nova solicitação de reforma!')">
+                + Nova Solicitação
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
+                <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full uppercase">Em Andamento</span>
+                <h5 class="text-sm font-bold text-gray-900 mt-2 mb-1">Reforma e Pintura de Sala Comercial</h5>
+                <p class="text-xs text-gray-500 mb-3">Contratado com: M.V. Climatização & Pintura (R$ 1.250,00)</p>
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
+                  <span class="text-gray-500">Status: Execução</span>
+                  <button type="button" class="text-emerald-600 font-bold hover:underline" onclick="alert('Abrindo comprovante de pagamento Pix da contratação!')">Ver Fatura Pix</button>
+                </div>
+              </div>
+              <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
+                <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Aguardando Propostas</span>
+                <h5 class="text-sm font-bold text-gray-900 mt-2 mb-1">Instalação de Bancadas e Porcelanato</h5>
+                <p class="text-xs text-gray-500 mb-3">Recebeu 2 propostas de pedreiros locais.</p>
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
+                  <span class="text-gray-500">2 Propostas</span>
+                  <button type="button" class="text-indigo-600 font-bold hover:underline" onclick="alert('Comparando propostas de porcelanato!')">Comparar Propostas</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ` : `
+          <div class="space-y-4">
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex justify-between items-center">
+              <div>
+                <h4 class="text-sm font-bold text-indigo-900">Ambiente da Prestadora Ativo</h4>
+                <p class="text-xs text-indigo-700">Você está navegando como profissional: emitindo orçamentos de consultoria e acompanhamento.</p>
+              </div>
+              <span class="text-xs bg-white text-indigo-800 border border-indigo-200 px-3 py-1 rounded-lg font-bold">
+                Reputação: 4.8⭐ (31 avaliações)
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
+                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">Proposta Aceita</span>
+                <h5 class="text-sm font-bold text-gray-900 mt-2 mb-1">Consultoria de Layout e Iluminação Residencial</h5>
+                <p class="text-xs text-gray-500 mb-3">Cliente: Roberto Camargo &bull; R$ 850,00</p>
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
+                  <span class="text-gray-500">Prazo: 5 dias</span>
+                  <button type="button" class="text-emerald-700 font-bold hover:underline" onclick="alert('Gerando cobrança Pix da consultoria!')">Cobrança Pix</button>
+                </div>
+              </div>
+              <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-xs">
+                <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full uppercase">Nova Demanda Compatível</span>
+                <h5 class="text-sm font-bold text-gray-900 mt-2 mb-1">Projeto de Interiores para Apartamento Compacto</h5>
+                <p class="text-xs text-gray-500 mb-3">Solicitante aguarda propostas de consultoria.</p>
+                <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
+                  <span class="text-gray-500">São Paulo, SP</span>
+                  <button type="button" class="text-indigo-600 font-bold hover:underline" onclick="alert('Simulação: Abrindo envio de orçamento formal de consultoria!')">Enviar Proposta</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+
+  // Bind toggle misto
+  container.querySelectorAll('.btn-toggle-misto').forEach(b => {
+    b.addEventListener('click', () => {
+      demoState.subAbaCenario3 = b.getAttribute('data-visao');
+      renderizarCenario3Misto(container);
+    });
+  });
+}
+
 
 // =============================================================================
 // 1. ABA: RANKING DE DEMONSTRAÇÃO

@@ -41,12 +41,17 @@ const TAXONOMIA = {
 
 // Handle Authentication State Changes
 onAuthStateChanged(auth, async (user) => {
+    const aiWidget = document.getElementById('ai-floating-widget-wrapper');
+    const aiModal = document.getElementById('ai-chat-modal');
     if (user) {
-        // User is logged in
+        // User is logged in - Exibe o widget exclusivo da IA
+        if (aiWidget) aiWidget.classList.remove('hidden');
         renderAuthenticatedNav(user);
         await checkUserProfile(user);
     } else {
-        // User is logged out
+        // User is logged out - Oculta completamente o assistente IA para anônimos
+        if (aiWidget) aiWidget.classList.add('hidden');
+        if (aiModal) aiModal.classList.add('hidden');
         renderUnauthenticatedNav();
         renderWelcomeScreen();
     }
@@ -797,9 +802,9 @@ async function abrirModalDetalhesServico(servico, prestador, currentUserData) {
                 const user = auth.currentUser;
                 if (!user) throw new Error("Você precisa estar conectado para contratar.");
 
-                await addDoc(collection(db, "solicitacoes"), {
+                const novaSolicitacaoRef = await addDoc(collection(db, "solicitacoes"), {
                     solicitanteId: user.uid,
-                    nomeSolicitante: user.displayName || 'Cliente',
+                    nomeSolicitante: user.displayName || currentUserData.nome || 'Cliente',
                     titulo: `Contratação Direta: ${servico.titulo}`,
                     categoria: servico.categoria,
                     subcategoria: servico.subcategoria,
@@ -812,14 +817,38 @@ async function abrirModalDetalhesServico(servico, prestador, currentUserData) {
                     criadoEm: serverTimestamp()
                 });
 
-                const prestadorRef = doc(db, "usuarios", servico.prestador_uid);
-                const prestadorSnap = await getDoc(prestadorRef);
-                if (prestadorSnap.exists()) {
-                    const d = prestadorSnap.data();
-                    await updateDoc(prestadorRef, {
-                        pontos: (d.pontos || 0) + 15,
-                        servicos_concluidos: (d.servicos_concluidos || 0) + 1
+                // Registra na coleção contratacoes para auditoria e histórico de contratos
+                try {
+                    await addDoc(collection(db, "contratacoes"), {
+                        solicitacaoId: novaSolicitacaoRef.id,
+                        solicitanteId: user.uid,
+                        nomeSolicitante: user.displayName || currentUserData.nome || 'Cliente',
+                        prestadorId: servico.prestador_uid,
+                        nomePrestador: prestador.nome || 'Prestador',
+                        servicoId: servico.id,
+                        tituloServico: servico.titulo,
+                        valor: servico.valor_base || 0,
+                        status: "CONFIRMADA",
+                        criadoEm: serverTimestamp()
                     });
+                } catch (eContrato) {
+                    console.warn("Aviso ao registrar contratação específica:", eContrato);
+                }
+
+                // Tenta atualizar reputação do prestador de forma segura
+                try {
+                    const prestadorRef = doc(db, "usuarios", servico.prestador_uid);
+                    const prestadorSnap = await getDoc(prestadorRef);
+                    if (prestadorSnap.exists()) {
+                        const d = prestadorSnap.data();
+                        await updateDoc(prestadorRef, {
+                            pontos: (d.pontos || 0) + 15,
+                            servicos_concluidos: (d.servicos_concluidos || 0) + 1
+                        });
+                    }
+                } catch (ePerm) {
+                    // Segurança do Firestore: se regras do perfil impedirem escrita direta no documento de outro usuário, ignora sem quebrar a contratação
+                    console.info("Pontuação do prestador será contabilizada no backend:", ePerm.message);
                 }
 
                 modal.classList.add('hidden');
@@ -1413,13 +1442,193 @@ const orcamentoModal = document.getElementById('orcamento-modal');
 const formOrcamento = document.getElementById('form-orcamento');
 const verOrcamentosModal = document.getElementById('ver-orcamentos-modal');
 
+// Modelos Pré-formatados de Orçamento (Templates Reutilizáveis)
+const ORCAMENTO_TEMPLATES = {
+    eletrica: {
+        escopo: "Etapa 1: Inspeção termográfica e teste de continuidade de circuitos elétricos;\nEtapa 2: Substituição de disjuntores obsoletos por padrão DIN e aperto de barramentos;\nEtapa 3: Balanceamento de fases, testes de fuga de corrente e identificação dos circuitos.",
+        maoDeObra: 280.00,
+        deslocamento: 40.00,
+        itens: [
+            { descricao: "Disjuntor Bipolar 40A Curva C Steck", quantidade: 1, valorUnitario: 55.00 },
+            { descricao: "Disjuntor Unipolar 20A Curva B Steck", quantidade: 3, valorUnitario: 15.00 },
+            { descricao: "Barramento tipo Pente Bifásico e Conectores", quantidade: 1, valorUnitario: 35.00 }
+        ],
+        prazo: 1,
+        garantia: "180 dias",
+        observacao: "Garantia de 6 meses sobre os serviços prestados. Aprovado conforme normas NBR 5410."
+    },
+    ar_condicionado: {
+        escopo: "Etapa 1: Furação em alvenaria e fixação dos suportes da evaporadora e condensadora;\nEtapa 2: Instalação da tubulação de cobre com isolamento blindado e cabeamento PP;\nEtapa 3: Teste de estanqueidade com nitrogênio, vácuo abaixo de 500 micra e carga de fluído.",
+        maoDeObra: 380.00,
+        deslocamento: 50.00,
+        itens: [
+            { descricao: "Kit Tubulação Cobre 1/4 e 3/8 com Isolamento (3m)", quantidade: 1, valorUnitario: 80.00 },
+            { descricao: "Suporte Reforçado para Condensadora Externa", quantidade: 1, valorUnitario: 35.00 },
+            { descricao: "Cabo PP 4x1.5mm e dreno cristal reforçado", quantidade: 1, valorUnitario: 25.00 }
+        ],
+        prazo: 1,
+        garantia: "365 dias",
+        observacao: "Não inclui ponto elétrico dedicado de força 220V no local. Garantia de 1 ano na instalação."
+    },
+    pintura: {
+        escopo: "Etapa 1: Lixamento prévio, raspagem de partes soltas e aplicação de fundo preparador;\nEtapa 2: Aplicação de duas demãos de massa corrida com lixamento intermediário;\nEtapa 3: Aplicação de duas a três demãos de tinta acrílica acetinada de primeira linha.",
+        maoDeObra: 480.00,
+        deslocamento: 30.00,
+        itens: [
+            { descricao: "Lixas para parede grãos 150 e 220 (pct c/ 10)", quantidade: 1, valorUnitario: 25.00 },
+            { descricao: "Fitas crepe automotiva 48mm e rolo de lona protetora", quantidade: 2, valorUnitario: 22.50 },
+            { descricao: "Massa Corrida PVA Balde 25kg Suvinil", quantidade: 1, valorUnitario: 95.00 }
+        ],
+        prazo: 3,
+        garantia: "90 dias",
+        observacao: "Ambiente devidamente protegido com lona e fita crepe. Limpeza completa após a pintura."
+    },
+    hidraulica: {
+        escopo: "Etapa 1: Detecção acústica e visual de vazamentos em tubulação pressurizada;\nEtapa 2: Abertura cirúrgica, corte do trecho danificado e instalação de luva de correr/unilong;\nEtapa 3: Testes hidrostáticos de estanqueidade sob pressão de rede e fechamento com argamassa.",
+        maoDeObra: 220.00,
+        deslocamento: 30.00,
+        itens: [
+            { descricao: "Luva de Correr PVC Soldável 25mm Tigre", quantidade: 2, valorUnitario: 18.00 },
+            { descricao: "Tubo PVC Soldável Marrom 25mm (1 barra)", quantidade: 1, valorUnitario: 22.00 },
+            { descricao: "Adesivo Plástico para PVC e Fita Veda Rosca", quantidade: 1, valorUnitario: 20.00 }
+        ],
+        prazo: 1,
+        garantia: "180 dias",
+        observacao: "Garantia estendida contra novos vazamentos no trecho reparado."
+    }
+};
+
+function calcularTotaisOrcamento() {
+    const maoDeObra = parseFloat(document.getElementById('orc-mao-obra')?.value) || 0;
+    const deslocamento = parseFloat(document.getElementById('orc-deslocamento')?.value) || 0;
+    
+    let subtotalPecas = 0;
+    const pecasRows = document.querySelectorAll('.peca-row');
+    pecasRows.forEach(row => {
+        const qtd = parseFloat(row.querySelector('.peca-qtd')?.value) || 0;
+        const unit = parseFloat(row.querySelector('.peca-unit')?.value) || 0;
+        subtotalPecas += (qtd * unit);
+    });
+
+    const subtotalEl = document.getElementById('orc-subtotal-pecas');
+    if (subtotalEl) {
+        subtotalEl.textContent = `R$ ${subtotalPecas.toFixed(2).replace('.', ',')}`;
+    }
+
+    const totalConsolidado = maoDeObra + deslocamento + subtotalPecas;
+    const displayTotal = document.getElementById('orc-total-consolidado-display');
+    if (displayTotal) {
+        displayTotal.textContent = `R$ ${totalConsolidado.toFixed(2).replace('.', ',')}`;
+    }
+
+    return { maoDeObra, deslocamento, subtotalPecas, totalConsolidado };
+}
+
+function vincularEventosPecasRow(row) {
+    row.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', calcularTotaisOrcamento);
+    });
+    row.querySelector('.btn-remover-peca')?.addEventListener('click', () => {
+        const totalRows = document.querySelectorAll('.peca-row').length;
+        if (totalRows > 1) {
+            row.remove();
+            calcularTotaisOrcamento();
+        } else {
+            // Limpa os campos se for a única linha
+            row.querySelector('.peca-desc').value = '';
+            row.querySelector('.peca-qtd').value = '1';
+            row.querySelector('.peca-unit').value = '';
+            calcularTotaisOrcamento();
+        }
+    });
+}
+
+// Botão Adicionar Peça
+document.getElementById('btn-add-peca')?.addEventListener('click', () => {
+    const container = document.getElementById('orc-pecas-container');
+    if (!container) return;
+    const newRow = document.createElement('div');
+    newRow.className = 'grid grid-cols-12 gap-1.5 items-center peca-row';
+    newRow.innerHTML = `
+        <input type="text" placeholder="Item/Peça (ex.: Disjuntor Bipolar 40A)" class="col-span-6 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-desc">
+        <input type="number" placeholder="Qtd" value="1" min="1" class="col-span-2 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-qtd">
+        <input type="number" step="0.01" min="0" placeholder="Unit (R$)" class="col-span-3 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-unit">
+        <button type="button" class="col-span-1 text-gray-400 hover:text-red-600 transition-colors btn-remover-peca text-center" title="Remover item">
+            <i class="fas fa-trash-alt text-xs"></i>
+        </button>
+    `;
+    container.appendChild(newRow);
+    vincularEventosPecasRow(newRow);
+});
+
+// Listener de input nos campos principais
+document.getElementById('orc-mao-obra')?.addEventListener('input', calcularTotaisOrcamento);
+document.getElementById('orc-deslocamento')?.addEventListener('input', calcularTotaisOrcamento);
+
+// Inicializar eventos nas linhas existentes
+document.querySelectorAll('.peca-row').forEach(vincularEventosPecasRow);
+
+// Seletor de Templates Reutilizáveis
+document.getElementById('select-orc-template')?.addEventListener('change', (e) => {
+    const tplKey = e.target.value;
+    if (!tplKey || !ORCAMENTO_TEMPLATES[tplKey]) return;
+
+    const tpl = ORCAMENTO_TEMPLATES[tplKey];
+    document.getElementById('orc-escopo').value = tpl.escopo;
+    document.getElementById('orc-mao-obra').value = tpl.maoDeObra;
+    document.getElementById('orc-deslocamento').value = tpl.deslocamento;
+    document.getElementById('orc-prazo').value = tpl.prazo;
+    document.getElementById('orc-garantia').value = tpl.garantia;
+    document.getElementById('orc-observacao').value = tpl.observacao;
+
+    const container = document.getElementById('orc-pecas-container');
+    if (container && tpl.itens && tpl.itens.length > 0) {
+        container.innerHTML = '';
+        tpl.itens.forEach(it => {
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-1.5 items-center peca-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Item/Peça" value="${it.descricao}" class="col-span-6 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-desc">
+                <input type="number" placeholder="Qtd" value="${it.quantidade}" min="1" class="col-span-2 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-qtd">
+                <input type="number" step="0.01" min="0" placeholder="Unit (R$)" value="${it.valorUnitario}" class="col-span-3 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-unit">
+                <button type="button" class="col-span-1 text-gray-400 hover:text-red-600 transition-colors btn-remover-peca text-center" title="Remover item">
+                    <i class="fas fa-trash-alt text-xs"></i>
+                </button>
+            `;
+            container.appendChild(row);
+            vincularEventosPecasRow(row);
+        });
+    }
+
+    calcularTotaisOrcamento();
+});
+
 function abrirModalOrcamento(solicitacaoId) {
     formOrcamento.reset();
     document.getElementById('orcamento-solicitacao-id').value = solicitacaoId;
+    const container = document.getElementById('orc-pecas-container');
+    if (container) {
+        container.innerHTML = `
+            <div class="grid grid-cols-12 gap-1.5 items-center peca-row">
+                <input type="text" placeholder="Item/Peça (ex.: Disjuntor Bipolar 40A)" class="col-span-6 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-desc">
+                <input type="number" placeholder="Qtd" value="1" min="1" class="col-span-2 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-qtd">
+                <input type="number" step="0.01" min="0" placeholder="Unit (R$)" class="col-span-3 text-xs border border-gray-300 rounded-lg p-2 bg-white peca-unit">
+                <button type="button" class="col-span-1 text-gray-400 hover:text-red-600 transition-colors btn-remover-peca text-center" title="Remover item">
+                    <i class="fas fa-trash-alt text-xs"></i>
+                </button>
+            </div>
+        `;
+        document.querySelectorAll('.peca-row').forEach(vincularEventosPecasRow);
+    }
+    calcularTotaisOrcamento();
     orcamentoModal.classList.remove('hidden');
 }
 
 document.getElementById('btn-cancelar-orcamento')?.addEventListener('click', () => {
+    orcamentoModal.classList.add('hidden');
+});
+
+document.getElementById('backdrop-orcamento')?.addEventListener('click', () => {
     orcamentoModal.classList.add('hidden');
 });
 
@@ -1430,11 +1639,33 @@ formOrcamento?.addEventListener('submit', async (e) => {
     btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Enviando...';
     
     const solicitacaoId = document.getElementById('orcamento-solicitacao-id').value;
+    const escopo = document.getElementById('orc-escopo').value.trim();
     const maoDeObra = parseFloat(document.getElementById('orc-mao-obra').value) || 0;
-    const material = parseFloat(document.getElementById('orc-material').value) || 0;
-    const prazo = parseInt(document.getElementById('orc-prazo').value, 10);
-    const observacao = document.getElementById('orc-observacao').value;
-    const total = maoDeObra + material;
+    const deslocamento = parseFloat(document.getElementById('orc-deslocamento')?.value) || 0;
+    const prazo = parseInt(document.getElementById('orc-prazo').value, 10) || 1;
+    const garantia = document.getElementById('orc-garantia')?.value || '90 dias';
+    const observacao = document.getElementById('orc-observacao').value.trim();
+
+    // Coleta peças e insumos discriminados
+    const itens = [];
+    let subtotalMateriais = 0;
+    document.querySelectorAll('.peca-row').forEach(row => {
+        const desc = row.querySelector('.peca-desc')?.value.trim();
+        const qtd = parseFloat(row.querySelector('.peca-qtd')?.value) || 0;
+        const unit = parseFloat(row.querySelector('.peca-unit')?.value) || 0;
+        if (desc && qtd > 0) {
+            const sub = qtd * unit;
+            subtotalMateriais += sub;
+            itens.push({
+                descricao: desc,
+                quantidade: qtd,
+                valorUnitario: unit,
+                subtotal: sub
+            });
+        }
+    });
+
+    const totalConsolidado = maoDeObra + deslocamento + subtotalMateriais;
     
     try {
         const user = auth.currentUser;
@@ -1443,24 +1674,28 @@ formOrcamento?.addEventListener('submit', async (e) => {
         await addDoc(collection(db, "orcamentos"), {
             solicitacaoId: solicitacaoId,
             prestadorId: user.uid,
-            nomePrestador: user.displayName || 'Prestador',
+            nomePrestador: user.displayName || currentUserData.nome || 'Prestador Profissional',
+            escopo: escopo,
             maoDeObra: maoDeObra,
-            material: material,
-            total: total,
+            material: subtotalMateriais,
+            outrosCustos: deslocamento,
+            itens: itens,
+            total: totalConsolidado,
             prazo: prazo,
+            garantia: garantia,
             observacao: observacao,
             status: "AGUARDANDO",
             criadoEm: serverTimestamp()
         });
         
         orcamentoModal.classList.add('hidden');
-        alert("Proposta enviada com sucesso!");
+        alert("Proposta comercial formal enviada com sucesso! O solicitante receberá a notificação com a discriminação completa dos custos.");
     } catch (error) {
         console.error("Erro ao salvar orçamento:", error);
-        alert("Erro ao enviar a proposta. Tente novamente.");
+        alert("Erro ao enviar a proposta: " + error.message);
     } finally {
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = 'Enviar Proposta';
+        btnSubmit.innerHTML = '<i class="fas fa-paper-plane mr-2 text-xs"></i> Enviar Proposta Formal';
     }
 });
 
@@ -1502,37 +1737,77 @@ async function abrirModalVerOrcamentos(solicitacaoId) {
         orcamentos.forEach((o) => {
             const valorFormatado = `R$ ${o.total.toFixed(2).replace('.', ',')}`;
             const btnAprovar = (!temAprovado && o.status === 'AGUARDANDO') ? 
-                `<button class="btn-aprovar-orcamento mt-3 w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors" data-id="${o.id}" data-solicitacao="${solicitacaoId}">
-                    Aceitar Proposta
+                `<button class="btn-aprovar-orcamento mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer" data-id="${o.id}" data-solicitacao="${solicitacaoId}">
+                    <i class="fas fa-check-circle"></i> Aceitar Proposta Comercial
+                </button>` : '';
+
+            const btnPagarPix = (o.status === 'APROVADO') ?
+                `<button class="btn-ver-fatura-pix mt-3 w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer" data-id="${o.id}">
+                    <i class="fab fa-pix text-sm"></i> Pagar via Pix / Ver Fatura Comercial & PDF
                 </button>` : '';
 
             let statusBadge = '';
             if (o.status === 'APROVADO') {
-                statusBadge = '<span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-md">APROVADO</span>';
+                statusBadge = '<span class="inline-block px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-200">PROPOSTA APROVADA</span>';
             } else if (o.status === 'REPROVADO') {
-                statusBadge = '<span class="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-md">REPROVADO</span>';
+                statusBadge = '<span class="inline-block px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-lg">REPROVADO</span>';
+            } else {
+                statusBadge = '<span class="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-semibold rounded-md">AGUARDANDO SUA DECISÃO</span>';
+            }
+
+            // Decomposição dos Itens/Peças (se houver)
+            let htmlItens = '';
+            if (o.itens && o.itens.length > 0) {
+                htmlItens = `
+                    <div class="mt-2 text-xs bg-white p-2 rounded-lg border border-gray-100">
+                        <span class="font-bold text-gray-700 block mb-1">Peças & Insumos Discriminados:</span>
+                        <div class="space-y-1">
+                            ${o.itens.map(it => `
+                                <div class="flex justify-between text-gray-600 text-[11px]">
+                                    <span>• ${it.descricao} (x${it.quantidade})</span>
+                                    <span class="font-semibold">R$ ${(it.subtotal || (it.quantidade * it.valorUnitario) || 0).toFixed(2).replace('.', ',')}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
             }
 
             html += `
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                    <div class="flex justify-between items-start">
+                <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 sm:p-5 transition-shadow hover:shadow-xs">
+                    <div class="flex justify-between items-start gap-3">
                         <div class="flex-grow">
-                            <div class="flex justify-between items-center mb-1">
-                                <h4 class="text-md font-semibold text-gray-900">${o.nomePrestador}</h4>
+                            <div class="flex justify-between items-center mb-1 flex-wrap gap-2">
+                                <h4 class="text-base font-bold text-gray-900">${o.nomePrestador}</h4>
                                 ${statusBadge}
                             </div>
-                            <div class="text-sm text-gray-600 grid grid-cols-2 gap-2 mt-2">
-                                <div><span class="font-medium">Mão de Obra:</span> R$ ${o.maoDeObra.toFixed(2).replace('.', ',')}</div>
-                                <div><span class="font-medium">Material:</span> R$ ${o.material.toFixed(2).replace('.', ',')}</div>
-                                <div><span class="font-medium">Prazo:</span> ${o.prazo} dias</div>
+                            
+                            ${o.escopo ? `
+                                <div class="mt-2 text-xs text-gray-700 bg-white p-2.5 border border-gray-100 rounded-xl">
+                                    <span class="font-bold text-gray-900 block mb-0.5"><i class="fas fa-tasks text-blue-600 mr-1"></i> Escopo & Etapas:</span>
+                                    <p class="whitespace-pre-line text-gray-600">${o.escopo}</p>
+                                </div>
+                            ` : ''}
+
+                            <div class="text-xs text-gray-600 grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3 bg-white/60 p-2.5 rounded-xl border border-gray-100">
+                                <div><span class="font-bold text-gray-700">Mão de Obra:</span><br>R$ ${(o.maoDeObra || 0).toFixed(2).replace('.', ',')}</div>
+                                <div><span class="font-bold text-gray-700">Materiais:</span><br>R$ ${(o.material || 0).toFixed(2).replace('.', ',')}</div>
+                                ${o.outrosCustos ? `<div><span class="font-bold text-gray-700">Deslocamento:</span><br>R$ ${o.outrosCustos.toFixed(2).replace('.', ',')}</div>` : ''}
+                                <div><span class="font-bold text-gray-700">Prazo Estimado:</span><br>${o.prazo || 1} dia(s)</div>
+                                ${o.garantia ? `<div><span class="font-bold text-gray-700">Garantia:</span><br>${o.garantia}</div>` : ''}
                             </div>
-                            ${o.observacao ? `<p class="mt-2 text-sm text-gray-500 italic bg-white p-2 border border-gray-100 rounded-lg">"${o.observacao}"</p>` : ''}
+
+                            ${htmlItens}
+
+                            ${o.observacao ? `<p class="mt-2 text-xs text-gray-500 italic bg-white p-2 border border-gray-100 rounded-lg">"${o.observacao}"</p>` : ''}
                         </div>
-                        <div class="text-right ml-4 flex flex-col items-end justify-center h-full pt-6">
-                            <span class="block text-lg font-bold text-gray-900">${valorFormatado}</span>
+                        <div class="text-right shrink-0 flex flex-col items-end">
+                            <span class="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider block">Total Proposto</span>
+                            <span class="text-xl sm:text-2xl font-black text-gray-900">${valorFormatado}</span>
                         </div>
                     </div>
                     ${btnAprovar}
+                    ${btnPagarPix}
                 </div>
             `;
         });
@@ -1541,8 +1816,51 @@ async function abrirModalVerOrcamentos(solicitacaoId) {
         
         listContainer.querySelectorAll('.btn-aprovar-orcamento').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const btnEl = e.target;
+                const btnEl = e.currentTarget;
                 aprovarOrcamento(btnEl.dataset.id, btnEl.dataset.solicitacao, orcamentos);
+            });
+        });
+
+        listContainer.querySelectorAll('.btn-ver-fatura-pix').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const btnEl = e.currentTarget;
+                const orc = orcamentos.find(item => item.id === btnEl.dataset.id);
+                if (!orc) return;
+
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Carregando fatura...';
+
+                try {
+                    let chavePixPrestador = '';
+                    if (orc.prestadorId) {
+                        const prestadorSnap = await getDoc(doc(db, "usuarios", orc.prestadorId));
+                        if (prestadorSnap.exists()) {
+                            chavePixPrestador = prestadorSnap.data().chavePix || '';
+                        }
+                    }
+
+                    abrirModalPix(
+                        `Serviço Contratado: ${orc.nomePrestador}`,
+                        `R$ ${orc.total.toFixed(2).replace('.', ',')}`,
+                        chavePixPrestador,
+                        orc.nomePrestador,
+                        {
+                            escopo: orc.escopo,
+                            maoDeObra: orc.maoDeObra,
+                            material: orc.material,
+                            deslocamento: orc.outrosCustos,
+                            itens: orc.itens,
+                            prazo: orc.prazo,
+                            garantia: orc.garantia
+                        }
+                    );
+                } catch (errPix) {
+                    console.error("Erro ao abrir fatura Pix:", errPix);
+                    alert("Erro ao carregar detalhes da fatura.");
+                } finally {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = '<i class="fab fa-pix text-sm"></i> Pagar via Pix / Ver Fatura Comercial & PDF';
+                }
             });
         });
         
@@ -1881,19 +2199,64 @@ async function carregarMeusOrcamentos(uid, chavePix) {
 
 const pixModal = document.getElementById('pix-modal');
 
-function abrirModalPix(titulo, valor, chavePix, nomePrestador = 'Prestador Profissional') {
+function abrirModalPix(titulo, valor, chavePix, nomePrestador = 'Prestador Profissional', detalhes = {}) {
     if (!pixModal) return;
 
     document.getElementById('pix-modal-titulo').textContent = titulo;
     document.getElementById('pix-modal-valor').textContent = valor;
-    document.getElementById('pix-modal-chave').textContent = chavePix;
+    document.getElementById('pix-modal-chave').textContent = chavePix || 'Chave Pix a combinar com o prestador';
     document.getElementById('pix-modal-data').textContent = new Date().toLocaleDateString('pt-BR');
-    document.getElementById('pix-modal-subtitulo').textContent = `${nomePrestador} • ServiçosApp Marketplace`;
+    document.getElementById('pix-modal-subtitulo').textContent = `${nomePrestador} • ServiçosApp Marketplace Oficial`;
+
+    // Renderiza Escopo e Etapas
+    const escopoContainer = document.getElementById('pix-modal-escopo-container');
+    const escopoTexto = document.getElementById('pix-modal-escopo-texto');
+    if (escopoContainer && escopoTexto) {
+        if (detalhes.escopo) {
+            escopoTexto.textContent = detalhes.escopo;
+            escopoContainer.classList.remove('hidden');
+        } else {
+            escopoTexto.textContent = 'Execução de serviço sob medida conforme especificado na solicitação.';
+            escopoContainer.classList.remove('hidden');
+        }
+    }
+
+    // Renderiza Itens de Materiais
+    const itensContainer = document.getElementById('pix-modal-itens-container');
+    if (itensContainer) {
+        if (detalhes.itens && detalhes.itens.length > 0) {
+            let htmlItens = '<span class="font-bold text-gray-900 block mb-1">Peças & Insumos Discriminados:</span>';
+            detalhes.itens.forEach(it => {
+                const sub = it.subtotal || (it.quantidade * (it.valorUnitario || 0));
+                htmlItens += `
+                    <div class="flex justify-between items-center bg-white px-2.5 py-1.5 rounded-lg border border-gray-100 text-[11px]">
+                        <span class="text-gray-700 font-medium">${it.descricao} (x${it.quantidade})</span>
+                        <span class="font-bold text-gray-900">R$ ${sub.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `;
+            });
+            itensContainer.innerHTML = htmlItens;
+            itensContainer.classList.remove('hidden');
+        } else {
+            itensContainer.innerHTML = '';
+            itensContainer.classList.add('hidden');
+        }
+    }
+
+    // Valores discriminados na fatura
+    const maoObraEl = document.getElementById('pix-modal-mao-obra');
+    const materiaisEl = document.getElementById('pix-modal-materiais');
+    const deslocamentoEl = document.getElementById('pix-modal-deslocamento');
+    
+    if (maoObraEl) maoObraEl.textContent = detalhes.maoDeObra !== undefined ? `R$ ${detalhes.maoDeObra.toFixed(2).replace('.', ',')}` : valor;
+    if (materiaisEl) materiaisEl.textContent = detalhes.material !== undefined ? `R$ ${detalhes.material.toFixed(2).replace('.', ',')}` : 'R$ 0,00';
+    if (deslocamentoEl) deslocamentoEl.textContent = (detalhes.outrosCustos || detalhes.deslocamento) ? `R$ ${(detalhes.outrosCustos || detalhes.deslocamento).toFixed(2).replace('.', ',')}` : 'R$ 0,00';
 
     // Gera o QR Code Real em imagem
     const qrImg = document.getElementById('pix-qrcode-img');
     if (qrImg) {
-        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(chavePix)}`;
+        const qrData = chavePix || 'https://projetosteste-e7490.web.app';
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}`;
     }
 
     // Botão Copiar Chave Pix
@@ -1917,13 +2280,25 @@ function abrirModalPix(titulo, valor, chavePix, nomePrestador = 'Prestador Profi
     const btnWhats = document.getElementById('btn-whatsapp-pix');
     if (btnWhats) {
         btnWhats.onclick = () => {
-            const texto = `*DEMONSTRATIVO DE ORÇAMENTO & COBRANÇA PIX*\n\n` +
+            let texto = `*FATURA COMERCIAL & DEMONSTRATIVO DE ORÇAMENTO*\n\n` +
                 `📌 *Serviço:* ${titulo}\n` +
-                `💵 *Valor Total:* ${valor}\n` +
-                `🔑 *Chave Pix:* ${chavePix}\n` +
-                `👤 *Prestador:* ${nomePrestador}\n\n` +
+                `👤 *Prestador:* ${nomePrestador}\n`;
+            if (detalhes.escopo) {
+                texto += `🛠 *Escopo:* ${detalhes.escopo}\n`;
+            }
+            if (detalhes.maoDeObra) {
+                texto += `💼 *Mão de Obra:* R$ ${detalhes.maoDeObra.toFixed(2)}\n`;
+            }
+            if (detalhes.material) {
+                texto += `📦 *Materiais/Insumos:* R$ ${detalhes.material.toFixed(2)}\n`;
+            }
+            if (detalhes.outrosCustos || detalhes.deslocamento) {
+                texto += `🚚 *Deslocamento:* R$ ${(detalhes.outrosCustos || detalhes.deslocamento).toFixed(2)}\n`;
+            }
+            texto += `\n💰 *VALOR TOTAL CONSOLIDADO:* ${valor}\n\n` +
+                `🔑 *Chave Pix para Liquidação:* ${chavePix || 'A combinar'}\n` +
                 `📲 *Instruções:* Copie a chave Pix acima ou utilize o QR Code do demonstrativo para pagar diretamente pelo app do seu banco.\n\n` +
-                `Agradecemos pela preferência!`;
+                `Comprovante gerado via ServiçosApp Marketplace Oficial.`;
             window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
         };
     }

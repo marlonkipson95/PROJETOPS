@@ -1,10 +1,12 @@
-const CACHE_NAME = 'servicos-app-v4';
+const CACHE_NAME = 'servicos-app-v5';
 const urlsToCache = [
   '/',
   '/index.html',
   '/app.js',
   '/area-testes.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
