@@ -10,3 +10,5 @@ fix_app.py
 patch_app.py
 fix_tabs.py
 .env
+slide/
+public/slides/
